@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function Home() {
   const stops = [
     { name: "Campbell, CA", desc: "Home base — the journey begins" },
@@ -18,10 +20,13 @@ export default function Home() {
       <section className="relative bg-taru-green min-h-[60vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-taru-green-dark/40 to-taru-green/80" />
 
-        {/* Photo placeholder — replace src with actual Taru photo */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-20">
-          <div className="w-full h-full bg-taru-green-dark" />
-        </div>
+        <Image
+          src="/taru-hero.jpg"
+          alt="Taru, a 1976 VW Westfalia"
+          fill
+          className="object-cover"
+          priority
+        />
 
         <div className="relative z-10 text-center px-6 py-16 max-w-3xl mx-auto">
           <p className="text-taru-cream/80 text-sm uppercase tracking-widest mb-4 font-sans">
@@ -51,13 +56,6 @@ export default function Home() {
             </a>
           </div>
         </div>
-      </section>
-
-      {/* Van photo placeholder */}
-      <section className="bg-taru-green-dark py-3 text-center">
-        <p className="text-taru-cream/60 text-xs italic">
-          Taru&apos;s photo goes here — upload your hero image to /public/taru-hero.jpg
-        </p>
       </section>
 
       {/* Intro */}

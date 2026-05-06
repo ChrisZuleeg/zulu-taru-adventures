@@ -1,4 +1,5 @@
 import { supabase, MediaItem } from "@/lib/supabase";
+import { driveEmbedUrl } from "@/lib/drive";
 
 export const revalidate = 60;
 
@@ -28,28 +29,20 @@ export default async function Videos() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
           {(videos as MediaItem[]).map((video) => (
-            <a
+            <div
               key={video.id}
-              href={video.r2_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-2xl overflow-hidden border border-taru-cream/60 hover:shadow-md transition-all group"
+              className="bg-white rounded-2xl overflow-hidden border border-taru-cream/60 shadow-sm"
             >
-              {video.thumbnail_url ? (
-                <img
-                  src={video.thumbnail_url}
-                  alt={video.title}
-                  className="w-full aspect-video object-cover"
-                />
-              ) : (
-                <div className="w-full aspect-video bg-taru-green/10 flex items-center justify-center">
-                  <span className="text-taru-green/40 text-4xl">▶</span>
-                </div>
-              )}
+              <iframe
+                src={driveEmbedUrl(video.r2_url)}
+                className="w-full aspect-video"
+                allow="autoplay"
+                allowFullScreen
+              />
               <div className="p-4">
-                <p className="font-heading font-bold text-taru-green group-hover:text-taru-green-dark transition-colors">
+                <p className="font-heading font-bold text-taru-green">
                   {video.title}
                 </p>
                 {video.location && (
@@ -65,7 +58,7 @@ export default async function Videos() {
                   </p>
                 )}
               </div>
-            </a>
+            </div>
           ))}
         </div>
       )}

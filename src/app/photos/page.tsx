@@ -1,4 +1,5 @@
 import { supabase, MediaItem } from "@/lib/supabase";
+import { driveThumbnailUrl } from "@/lib/drive";
 
 export const revalidate = 60;
 
@@ -38,7 +39,7 @@ export default async function Photos() {
               className="group relative aspect-square overflow-hidden rounded-xl bg-taru-cream"
             >
               <img
-                src={photo.r2_url}
+                src={photo.thumbnail_url || driveThumbnailUrl(photo.r2_url)}
                 alt={photo.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />

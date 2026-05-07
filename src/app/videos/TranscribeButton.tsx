@@ -19,7 +19,7 @@ export default function TranscribeButton({ id }: { id: string }) {
       });
       let data: Record<string, string> = {};
       try { data = await res.json(); } catch {
-        setError(`Server error ${res.status} — check Vercel logs.`);
+        setError(`Server error ${res.status}.`);
         setStage("password");
         return;
       }

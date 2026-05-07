@@ -13,30 +13,36 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // POST — submit video to AssemblyAI, returns job_id immediately
 export async function POST(request: NextRequest) {
-  const { id, password } = await request.json();
+  try {
+    const { id, password } = await request.json();
 
-  if (password !== process.env.WRITE_PASSWORD) {
-    return NextResponse.json({ error: "Wrong password." }, { status: 401 });
+    if (password !== process.env.WRITE_PASSWORD) {
+      return NextResponse.json({ error: "Wrong password." }, { status: 401 });
+    }
+
+    const { data: video, error } = await supabase
+      .from("media")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error || !video) {
+      return NextResponse.json({ error: "Video not found." }, { status: 404 });
+    }
+
+    const fileId = driveFileId(video.r2_url);
+    if (!fileId) {
+      return NextResponse.json({ error: "Could not extract Google Drive file ID." }, { status: 400 });
+    }
+
+    const audioUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
+    const transcript = await assembly.transcripts.submit({ audio_url: audioUrl });
+    return NextResponse.json({ job_id: transcript.id });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("POST /api/transcribe error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
-
-  const { data: video, error } = await supabase
-    .from("media")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error || !video) {
-    return NextResponse.json({ error: "Video not found." }, { status: 404 });
-  }
-
-  const fileId = driveFileId(video.r2_url);
-  if (!fileId) {
-    return NextResponse.json({ error: "Could not extract Google Drive file ID." }, { status: 400 });
-  }
-
-  const audioUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
-  const transcript = await assembly.transcripts.submit({ audio_url: audioUrl });
-  return NextResponse.json({ job_id: transcript.id });
 }
 
 // GET — poll job status; on completion summarise with Claude and save

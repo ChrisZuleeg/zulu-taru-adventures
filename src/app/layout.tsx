@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import Link from "next/link";
+import Nav from "./components/Nav";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -46,15 +47,6 @@ export const metadata: Metadata = {
   },
 };
 
-const navLinks = [
-  { href: "/journal", label: "Journal" },
-  { href: "/videos", label: "Videos" },
-  { href: "/photos", label: "Photos" },
-  { href: "/route", label: "The Route" },
-  { href: "/tarus-story", label: "Taru's Story" },
-  { href: "/contact", label: "Contact" },
-];
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -77,7 +69,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <body className="min-h-screen flex flex-col bg-taru-sand font-sans">
-        <header className="bg-taru-green shadow-sm">
+        <header className="relative bg-taru-green shadow-sm">
           <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-6">
             <Link
               href="/"
@@ -85,17 +77,7 @@ export default function RootLayout({
             >
               Zulu and Taru&apos;s Adventures
             </Link>
-            <nav className="flex flex-wrap justify-end gap-0.5">
-              {navLinks.map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="px-3 py-1.5 text-sm font-medium text-taru-cream/75 hover:text-white hover:bg-white/10 rounded-md transition-colors whitespace-nowrap"
-                >
-                  {label}
-                </Link>
-              ))}
-            </nav>
+            <Nav />
           </div>
         </header>
 

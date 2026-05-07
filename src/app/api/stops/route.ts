@@ -17,6 +17,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Name and location are required." }, { status: 400 });
   }
 
+  // Find the last visited stop to insert after it
+  const { data: lastVisited } = await supabase
+    .from("stops")
+    .select("order_num")
+    .eq("visited", true)
+    .order("order_num", { ascending: false })
+    .limit(1)
+    .single();
+
+  // Fall back to end of list if nothing visited yet
   const { data: maxStop } = await supabase
     .from("stops")
     .select("order_num")
@@ -24,7 +34,11 @@ export async function POST(request: NextRequest) {
     .limit(1)
     .single();
 
-  const order_num = (maxStop?.order_num ?? 0) + 1;
+  const insertAfter = lastVisited?.order_num ?? maxStop?.order_num ?? 0;
+  const order_num = insertAfter + 1;
+
+  // Shift all stops after the insertion point up by 1
+  await supabase.rpc("increment_order_num_after", { cutoff: insertAfter });
 
   const { data, error } = await supabase
     .from("stops")

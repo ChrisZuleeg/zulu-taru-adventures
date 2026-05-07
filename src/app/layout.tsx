@@ -76,7 +76,7 @@ export default function RootLayout({
               href="/"
               className="flex items-center gap-3 shrink-0 group"
             >
-              <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-taru-green ring-2 ring-taru-cream/30">
+              <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-white ring-2 ring-taru-cream/35 shadow-sm">
                 <Image
                   src="/taru-logo.png"
                   alt="Zulu and Taru Adventures logo"
@@ -117,7 +117,7 @@ export default function RootLayout({
             <div className="grid gap-10 md:grid-cols-4 md:gap-10">
               <div className="md:col-span-1 rounded-2xl border border-taru-cream/20 bg-black/10 p-5">
                 <div>
-                  <span className="relative mb-3 inline-block h-20 w-20 overflow-hidden rounded-full bg-taru-green/40 ring-2 ring-taru-cream/25">
+                  <span className="relative mb-3 inline-block h-20 w-20 overflow-hidden rounded-full bg-white ring-2 ring-taru-cream/30 shadow-sm">
                     <Image
                       src="/taru-logo.png"
                       alt="Taru logo"

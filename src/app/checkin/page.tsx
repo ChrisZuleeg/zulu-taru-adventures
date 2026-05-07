@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 
 type Stop = {
   id: number;
@@ -82,7 +84,9 @@ export default function Checkin() {
                 {stop.visited_at && ` · visited ${new Date(stop.visited_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`}
               </p>
             </div>
-            <span className="text-lg">{stop.visited ? "✓" : ""}</span>
+            <span className="text-lg">
+              {stop.visited ? <FontAwesomeIcon icon={faCheck} className="h-4 w-4" /> : ""}
+            </span>
           </button>
         ))}
       </div>

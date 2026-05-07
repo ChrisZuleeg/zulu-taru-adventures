@@ -1,7 +1,27 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { config } from "@fortawesome/fontawesome-svg-core";
+import {
+  faArrowRight,
+  faBookOpen,
+  faCompass,
+  faMapLocationDot,
+  faPlus,
+  faWandSparkles,
+} from "@fortawesome/free-solid-svg-icons";
+import {
+  faFacebook,
+  faInstagram,
+  faLinkedin,
+  faXTwitter,
+  faYoutube,
+} from "@fortawesome/free-brands-svg-icons";
+import "@fortawesome/fontawesome-svg-core/styles.css";
 import "./globals.css";
+
+config.autoAddCss = false;
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -85,7 +105,7 @@ export default function RootLayout({
           <div className="w-full px-6 md:px-10 lg:px-12 pt-14 pb-8">
             <div className="mb-10 rounded-2xl border border-taru-cream/20 bg-taru-cream/8 p-6 md:p-7">
               <p className="text-[11px] uppercase tracking-[0.24em] text-taru-cream/65 mb-2 inline-flex items-center gap-2">
-                <span aria-hidden>*</span>
+                <FontAwesomeIcon icon={faWandSparkles} className="h-3 w-3" />
                 <span>Field Dispatch / Summer 2026</span>
               </p>
               <h2 className="font-heading text-3xl md:text-4xl leading-tight text-taru-cream mb-3">
@@ -99,22 +119,49 @@ export default function RootLayout({
               </p>
             </div>
 
-            <div className="grid gap-10 md:grid-cols-3 md:gap-12">
+            <div className="grid gap-10 md:grid-cols-4 md:gap-10">
+              <div className="md:col-span-1 rounded-2xl border border-taru-cream/20 bg-black/10 p-5">
+                <div>
+                  <p className="text-sm tracking-[0.18em] uppercase text-taru-cream/90">
+                    Zulu and Taru Adventures
+                  </p>
+                  <p className="mt-1 text-xs text-taru-cream/70">
+                    Southwest Road Chronicle
+                  </p>
+                </div>
+
+                <p className="mt-5 text-sm leading-relaxed text-taru-cream/80">
+                  Plan that out. Collect the stories. Capture every moment that
+                  becomes part of the journey.
+                </p>
+
+                <div className="mt-6">
+                  <p className="text-[11px] tracking-[0.2em] uppercase text-taru-cream/65 mb-3">
+                    Follow Us
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3 text-taru-cream/80">
+                    <a href="#" aria-label="X" className="hover:text-white transition-colors">
+                      <FontAwesomeIcon icon={faXTwitter} className="h-4 w-4" />
+                    </a>
+                    <a href="#" aria-label="LinkedIn" className="hover:text-white transition-colors">
+                      <FontAwesomeIcon icon={faLinkedin} className="h-4 w-4" />
+                    </a>
+                    <a href="#" aria-label="Instagram" className="hover:text-white transition-colors">
+                      <FontAwesomeIcon icon={faInstagram} className="h-4 w-4" />
+                    </a>
+                    <a href="#" aria-label="Facebook" className="hover:text-white transition-colors">
+                      <FontAwesomeIcon icon={faFacebook} className="h-4 w-4" />
+                    </a>
+                    <a href="#" aria-label="YouTube" className="hover:text-white transition-colors">
+                      <FontAwesomeIcon icon={faYoutube} className="h-4 w-4" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+
               <div className="md:col-span-1">
                 <h3 className="font-heading text-2xl text-taru-cream mb-4 inline-flex items-center gap-2.5">
-                  <svg
-                    aria-hidden
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4 text-taru-cream/85"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="8" />
-                    <path d="M12 7l3 8-8-3 5-5z" />
-                  </svg>
+                  <FontAwesomeIcon icon={faCompass} className="h-4 w-4 text-taru-cream/85" />
                   <span>Expedition Log</span>
                 </h3>
                 <ul className="space-y-2.5">
@@ -129,19 +176,7 @@ export default function RootLayout({
 
               <div>
                 <h3 className="font-heading text-xl text-taru-cream mb-4 inline-flex items-center gap-2">
-                  <svg
-                    aria-hidden
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4 text-taru-cream/85"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M4 5a2 2 0 0 1 2-2h5v17H6a2 2 0 0 0-2 2z" />
-                    <path d="M20 5a2 2 0 0 0-2-2h-5v17h5a2 2 0 0 1 2 2z" />
-                  </svg>
+                  <FontAwesomeIcon icon={faBookOpen} className="h-4 w-4 text-taru-cream/85" />
                   <span>Read the Chapters</span>
                 </h3>
                 <ul className="space-y-2.5">
@@ -151,7 +186,7 @@ export default function RootLayout({
                         href={href}
                         className="inline-flex items-center gap-2 text-sm text-taru-cream/80 hover:text-white transition-colors"
                       >
-                        <span className="text-taru-cream/50">➜</span>
+                        <FontAwesomeIcon icon={faArrowRight} className="h-3 w-3 text-taru-cream/50" />
                         {label}
                       </Link>
                     </li>
@@ -161,19 +196,7 @@ export default function RootLayout({
 
               <div>
                 <h3 className="font-heading text-xl text-taru-cream mb-4 inline-flex items-center gap-2">
-                  <svg
-                    aria-hidden
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4 text-taru-cream/85"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z" />
-                    <circle cx="12" cy="10" r="2.5" />
-                  </svg>
+                  <FontAwesomeIcon icon={faMapLocationDot} className="h-4 w-4 text-taru-cream/85" />
                   <span>Current Route Desk</span>
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -191,18 +214,7 @@ export default function RootLayout({
                   texture of life on the move.
                 </p>
                 <div className="mt-4 inline-flex items-center gap-2 text-xs text-taru-cream/70">
-                  <svg
-                    aria-hidden
-                    viewBox="0 0 24 24"
-                    className="h-3.5 w-3.5 text-taru-cream/80"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
+                  <FontAwesomeIcon icon={faPlus} className="h-3.5 w-3.5 text-taru-cream/80" />
                   <span>Live notes from the road</span>
                 </div>
               </div>

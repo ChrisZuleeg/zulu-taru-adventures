@@ -64,7 +64,7 @@ export default function RouteMap({ stops }: { stops: Stop[] }) {
         const infoWindow = new window.google.maps.InfoWindow({
           content: `<div style="font-family:sans-serif;padding:4px 2px">
             <strong>${stop.name}</strong>, ${stop.state}
-            ${stop.visited ? '<br/><span style="color:#6B7A2A;font-size:12px">✓ Visited</span>' : ""}
+            ${stop.visited ? '<br/><span style="color:#6B7A2A;font-size:12px"><i class="fa-solid fa-check" style="margin-right:4px"></i>Visited</span>' : ""}
           </div>`,
         });
 

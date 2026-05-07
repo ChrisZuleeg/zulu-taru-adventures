@@ -1,4 +1,6 @@
 import { supabase, hasSupabaseEnv } from "@/lib/supabase";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import RouteMap from "./RouteMap";
 
 export const revalidate = 60;
@@ -31,7 +33,7 @@ export default async function Route() {
             <div className="flex-shrink-0 flex flex-col items-center">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm
                 ${stop.visited ? "bg-taru-green text-taru-cream" : "bg-taru-cream text-taru-green border-2 border-taru-green/30"}`}>
-                {stop.visited ? "✓" : stop.order_num}
+                {stop.visited ? <FontAwesomeIcon icon={faCheck} className="h-3 w-3" /> : stop.order_num}
               </div>
               {stop.order_num < (stops?.length ?? 0) && (
                 <div className={`w-0.5 h-8 mt-1 ${stop.visited ? "bg-taru-green" : "bg-taru-green/20"}`} />

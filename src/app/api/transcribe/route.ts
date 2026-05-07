@@ -91,3 +91,22 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({ status: "completed", summary, transcript: transcriptText });
 }
+
+// DELETE — clear transcript and summary so the video can be re-transcribed
+export async function DELETE(request: NextRequest) {
+  try {
+    const { id, password } = await request.json();
+    if (password !== process.env.WRITE_PASSWORD) {
+      return NextResponse.json({ error: "Wrong password." }, { status: 401 });
+    }
+    const { error } = await supabase
+      .from("media")
+      .update({ transcript: null, summary: null })
+      .eq("id", id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}

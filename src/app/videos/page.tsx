@@ -1,6 +1,7 @@
 import { supabase, hasSupabaseEnv, MediaItem } from "@/lib/supabase";
 import { driveEmbedUrl } from "@/lib/drive";
 import TranscribeButton from "./TranscribeButton";
+import SummaryBlock from "./SummaryBlock";
 
 export const revalidate = 60;
 
@@ -77,7 +78,7 @@ export default async function Videos() {
                         <p className="text-sm text-gray-500 mt-1">{video.location}</p>
                       )}
                       {video.summary ? (
-                        <p className="text-sm text-gray-600 mt-2 leading-relaxed italic">{video.summary}</p>
+                        <SummaryBlock id={String(video.id)} summary={video.summary} />
                       ) : (
                         <TranscribeButton id={String(video.id)} />
                       )}

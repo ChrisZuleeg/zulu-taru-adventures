@@ -17,15 +17,20 @@ export default function TranscribeButton({ id }: { id: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, password }),
       });
-      const data = await res.json();
+      let data: Record<string, string> = {};
+      try { data = await res.json(); } catch {
+        setError(`Server error ${res.status} — check Vercel logs.`);
+        setStage("password");
+        return;
+      }
       if (!res.ok) {
-        setError(res.status === 401 ? "Wrong password." : data.error || "Failed to start.");
+        setError(res.status === 401 ? "Wrong password." : data.error || `Error ${res.status}`);
         setStage("password");
         return;
       }
       poll(data.job_id);
-    } catch {
-      setError("Could not reach server. Try again.");
+    } catch (e) {
+      setError(`Network error: ${e instanceof Error ? e.message : String(e)}`);
       setStage("password");
     }
   }
@@ -33,9 +38,14 @@ export default function TranscribeButton({ id }: { id: string }) {
   async function poll(job_id: string) {
     try {
       const res = await fetch(`/api/transcribe?job_id=${job_id}&media_id=${id}`);
-      const data = await res.json();
+      let data: Record<string, string> = {};
+      try { data = await res.json(); } catch {
+        setError(`Poll error ${res.status} — check Vercel logs.`);
+        setStage("password");
+        return;
+      }
       if (!res.ok) {
-        setError(data.error || "Transcription failed.");
+        setError(data.error || `Error ${res.status}`);
         setStage("password");
         return;
       }
@@ -45,8 +55,8 @@ export default function TranscribeButton({ id }: { id: string }) {
         return;
       }
       setTimeout(() => poll(job_id), 5000);
-    } catch {
-      setError("Lost connection while waiting. Refresh and try again.");
+    } catch (e) {
+      setError(`Lost connection: ${e instanceof Error ? e.message : String(e)}`);
       setStage("password");
     }
   }

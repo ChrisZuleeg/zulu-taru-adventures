@@ -3,8 +3,13 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { driveFileId } from "@/lib/drive";
+import ffmpeg from "fluent-ffmpeg";
+import ffmpegStatic from "ffmpeg-static";
+import { PassThrough } from "stream";
 
 export const maxDuration = 60;
+
+ffmpeg.setFfmpegPath(ffmpegStatic as string);
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,6 +18,25 @@ const supabase = createClient(
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+function extractAudio(url: string): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    const pass = new PassThrough();
+    pass.on("data", (chunk: Buffer) => chunks.push(chunk));
+    pass.on("end", () => resolve(Buffer.concat(chunks)));
+    pass.on("error", reject);
+
+    ffmpeg(url)
+      .noVideo()
+      .audioCodec("libmp3lame")
+      .audioBitrate("64k")
+      .format("mp3")
+      .output(pass)
+      .on("error", reject)
+      .run();
+  });
+}
+
 export async function POST(request: NextRequest) {
   const { id, password } = await request.json();
 
@@ -20,7 +44,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Wrong password." }, { status: 401 });
   }
 
-  // Fetch the video row
   const { data: video, error: fetchError } = await supabase
     .from("media")
     .select("*")
@@ -31,60 +54,47 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Video not found." }, { status: 404 });
   }
 
-  // Download from Google Drive
   const fileId = driveFileId(video.r2_url);
   if (!fileId) {
     return NextResponse.json({ error: "Could not extract Google Drive file ID." }, { status: 400 });
   }
 
-  // confirm=t bypasses Google's virus scan warning for large files
+  // Stream audio directly from Google Drive — no need to download the full video
   const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
-  const videoRes = await fetch(downloadUrl, { redirect: "follow" });
-  if (!videoRes.ok) {
-    return NextResponse.json({ error: `Google Drive download failed (${videoRes.status}).` }, { status: 502 });
-  }
+  const audioBuffer = await extractAudio(downloadUrl);
 
-  const videoBuffer = await videoRes.arrayBuffer();
-  const fileSizeMB = videoBuffer.byteLength / (1024 * 1024);
-
+  const fileSizeMB = audioBuffer.byteLength / (1024 * 1024);
   if (fileSizeMB > 24) {
     return NextResponse.json({
-      error: `Video is ${fileSizeMB.toFixed(0)}MB — Whisper's limit is 25MB. Use a shorter clip or reduce GoPro resolution before uploading.`,
+      error: `Audio is ${fileSizeMB.toFixed(1)}MB after extraction — clip is too long. Try a shorter video.`,
     }, { status: 413 });
   }
 
-  const videoFile = new File([videoBuffer], `${fileId}.mp4`, { type: "video/mp4" });
+  const audioFile = new File([new Uint8Array(audioBuffer)], `${fileId}.mp3`, { type: "audio/mpeg" });
 
-  // Transcribe with Whisper
   const transcription = await openai.audio.transcriptions.create({
-    file: videoFile,
+    file: audioFile,
     model: "whisper-1",
     response_format: "text",
   });
 
   const transcript = typeof transcription === "string" ? transcription : (transcription as any).text;
 
-  // Summarize with Claude
   const message = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 512,
     messages: [{
       role: "user",
-      content: `This is a transcript from a GoPro video taken during a road trip through the American Southwest in a 1976 VW Westfalia. Write a short, vivid 2–3 sentence summary of what happens in the video, written in second person ("Zulu..."). Keep it evocative and road-trip-y. Return only the summary, nothing else.\n\nTranscript:\n${transcript}`,
+      content: `This is a transcript from a GoPro video taken during a road trip through the American Southwest in a 1976 VW Westfalia. Write a short, vivid 2–3 sentence summary of what happens in the video, written in third person ("Zulu..."). Keep it evocative and road-trip-y. Return only the summary, nothing else.\n\nTranscript:\n${transcript}`,
     }],
   });
 
   const summary = (message.content[0] as { type: string; text: string }).text;
 
-  // Save to database
-  const { error: updateError } = await supabase
+  await supabase
     .from("media")
     .update({ transcript, summary })
     .eq("id", id);
-
-  if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 500 });
-  }
 
   return NextResponse.json({ transcript, summary });
 }

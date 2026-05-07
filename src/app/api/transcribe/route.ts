@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     const audioUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
-    const transcript = await getAssembly().transcripts.submit({ audio_url: audioUrl, speech_model: "universal-2" });
+    const transcript = await getAssembly().transcripts.submit({ audio_url: audioUrl, speech_models: ["universal-2"] });
     return NextResponse.json({ job_id: transcript.id });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);

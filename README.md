@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Zulu & Taru Adventures
 
-## Getting Started
+**A rolling story from the road.**
 
-First, run the development server:
+Zulu & Taru Adventures follows one summer journey through the American Southwest in Taru, a 1976 VW Westfalia. More than a travel log, it is a living digital postcard: part story, part map, part memory book.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## The Experience
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visitors can step into the trip through a set of connected experiences:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Storytelling pages** that share the heart behind the journey
+- **An interactive route map** that shows where the adventure has been and where it is headed
+- **Photo and video galleries** that bring each stop to life
+- **A contact space** for messages from friends, family, and fellow travelers
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## What Makes It Special
 
-## Learn More
+- A warm, narrative-first design focused on emotion and place
+- A blend of timeless van-life charm with modern web interactivity
+- Near-live trip updates powered by connected data sources
+- A structure built to grow with future journal entries and milestones
 
-To learn more about Next.js, take a look at the following resources:
+## Journey Sections
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `/` - a cinematic welcome to the trip and featured highlights
+- `/tarus-story` - the origin story of Taru and the road ahead
+- `/route` - visual progress of the adventure across stops
+- `/photos` - moments captured along the way
+- `/videos` - motion memories from the road
+- `/journal` - dedicated space for written travel entries
+- `/contact` - visitor notes and messages
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Behind the Scenes
 
-## Deploy on Vercel
+The site is built to feel personal on the surface and reliable underneath:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Route and media content are powered by Supabase
+- Mapping is delivered through the Google Maps JavaScript API
+- Media links are transformed for clean embeds and thumbnails
+- Contact delivery is handled through Formspree
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Where It’s Going
+
+Zulu & Taru Adventures is designed as an evolving travel companion, with room for richer journals, deeper route context, and a growing archive of stories from the road.

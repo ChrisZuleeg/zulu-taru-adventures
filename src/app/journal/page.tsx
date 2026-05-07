@@ -96,6 +96,7 @@ function NoteCard({ post }: { post: Post }) {
       </div>
       <div className="pb-2">
         <p className="text-xs text-gray-400 mb-1">{date} · {time}{post.location ? ` · ${post.location}` : ""}</p>
+        {post.title && <p className="font-semibold text-taru-green mb-1">{post.title}</p>}
         <p className="text-gray-700 leading-relaxed">{post.body}</p>
       </div>
     </div>

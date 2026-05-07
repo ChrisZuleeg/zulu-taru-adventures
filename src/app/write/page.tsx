@@ -128,15 +128,13 @@ export default function Write() {
       </div>
 
       <div className="space-y-4">
-        {mode === "journal" && (
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title"
-            className="w-full border border-taru-cream rounded-lg px-4 py-2.5 text-gray-700 focus:outline-none focus:border-taru-green bg-taru-sand font-heading text-lg"
-          />
-        )}
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Title"
+          className="w-full border border-taru-cream rounded-lg px-4 py-2.5 text-gray-700 focus:outline-none focus:border-taru-green bg-taru-sand font-heading text-lg"
+        />
         <input
           type="text"
           value={location}

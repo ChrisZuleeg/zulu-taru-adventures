@@ -8,7 +8,13 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SECRET_KEY!
 );
-const assembly = new AssemblyAI({ apiKey: process.env.ASSEMBLYAI_API_KEY! });
+
+function getAssembly() {
+  const key = process.env.ASSEMBLYAI_API_KEY;
+  if (!key) throw new Error("ASSEMBLYAI_API_KEY env var is not set in Vercel.");
+  return new AssemblyAI({ apiKey: key });
+}
+
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // POST — submit video to AssemblyAI, returns job_id immediately
@@ -36,7 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     const audioUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
-    const transcript = await assembly.transcripts.submit({ audio_url: audioUrl });
+    const transcript = await getAssembly().transcripts.submit({ audio_url: audioUrl });
     return NextResponse.json({ job_id: transcript.id });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
@@ -55,7 +61,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing job_id or media_id." }, { status: 400 });
   }
 
-  const transcript = await assembly.transcripts.get(job_id);
+  const transcript = await getAssembly().transcripts.get(job_id);
 
   if (transcript.status === "error") {
     return NextResponse.json({ error: `Transcription failed: ${transcript.error}` }, { status: 500 });

@@ -1,14 +1,19 @@
-import { supabase, MediaItem } from "@/lib/supabase";
+import { supabase, hasSupabaseEnv, MediaItem } from "@/lib/supabase";
 import { driveEmbedUrl } from "@/lib/drive";
 
 export const revalidate = 60;
 
 export default async function Videos() {
-  const { data: videos } = await supabase
-    .from("media")
-    .select("*")
-    .eq("type", "video")
-    .order("filmed_at", { ascending: false });
+  let videos: MediaItem[] | null = null;
+
+  if (supabase) {
+    const { data } = await supabase
+      .from("media")
+      .select("*")
+      .eq("type", "video")
+      .order("filmed_at", { ascending: false });
+    videos = (data as MediaItem[]) || [];
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-16">
@@ -18,6 +23,12 @@ export default async function Videos() {
       <p className="text-taru-brown italic text-lg mb-12">
         Raw footage from the highway, trails, and hot springs
       </p>
+      {!hasSupabaseEnv && (
+        <div className="mb-8 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-amber-900">
+          Supabase is not configured in this environment yet, so videos cannot
+          be loaded.
+        </div>
+      )}
 
       {!videos || videos.length === 0 ? (
         <div className="bg-taru-cream rounded-2xl p-10 text-center">
@@ -30,7 +41,7 @@ export default async function Videos() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-          {(videos as MediaItem[]).map((video) => (
+          {videos.map((video) => (
             <div
               key={video.id}
               className="bg-white rounded-2xl overflow-hidden border border-taru-cream/60 shadow-sm"

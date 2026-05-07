@@ -2,6 +2,13 @@ import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  if (!supabase) {
+    return NextResponse.json(
+      { error: "Supabase is not configured on this environment." },
+      { status: 500 }
+    );
+  }
+
   const { data, error } = await supabase
     .from("stops")
     .select("*")

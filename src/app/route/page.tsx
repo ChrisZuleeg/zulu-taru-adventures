@@ -1,13 +1,12 @@
-import { supabase } from "@/lib/supabase";
+import { supabase, hasSupabaseEnv } from "@/lib/supabase";
 import RouteMap from "./RouteMap";
 
 export const revalidate = 60;
 
 export default async function Route() {
-  const { data: stops } = await supabase
-    .from("stops")
-    .select("*")
-    .order("order_num");
+  const { data: stops } = supabase
+    ? await supabase.from("stops").select("*").order("order_num")
+    : { data: [] };
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-16">
@@ -17,6 +16,12 @@ export default async function Route() {
       <p className="text-taru-brown italic text-lg mb-10">
         ~4,000 miles across California, Nevada, Utah, New Mexico, and Colorado
       </p>
+      {!hasSupabaseEnv && (
+        <div className="mb-8 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-amber-900">
+          Supabase is not configured in this environment yet, so route progress
+          cannot be loaded.
+        </div>
+      )}
 
       <RouteMap stops={stops || []} />
 

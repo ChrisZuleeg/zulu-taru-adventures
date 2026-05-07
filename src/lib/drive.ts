@@ -1,6 +1,21 @@
 export function driveFileId(url: string): string | null {
-  const match = url.match(/\/d\/([^/]+)/);
-  return match ? match[1] : null;
+  // Supports common Google Drive URL formats:
+  // - /file/d/<id>/view
+  // - /d/<id>/...
+  // - ?id=<id>
+  try {
+    const parsed = new URL(url);
+    const queryId = parsed.searchParams.get("id");
+    if (queryId) return queryId;
+
+    const pathMatch = parsed.pathname.match(/\/d\/([^/]+)/);
+    if (pathMatch) return pathMatch[1];
+  } catch {
+    // Ignore invalid URLs and fall through to null.
+  }
+
+  const fallbackPathMatch = url.match(/\/d\/([^/]+)/);
+  return fallbackPathMatch ? fallbackPathMatch[1] : null;
 }
 
 export function driveEmbedUrl(url: string): string {

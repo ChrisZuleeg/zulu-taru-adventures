@@ -81,7 +81,7 @@ export default function RootLayout({
                   src="/taru-logo.png"
                   alt="Zulu and Taru Adventures logo"
                   fill
-                  className="object-cover object-center scale-[1.12]"
+                  className="object-contain object-center p-0.5"
                   sizes="44px"
                   priority
                 />
@@ -122,7 +122,7 @@ export default function RootLayout({
                       src="/taru-logo.png"
                       alt="Taru logo"
                       fill
-                      className="object-cover object-center scale-[1.12]"
+                      className="object-contain object-center p-1"
                       sizes="80px"
                     />
                   </span>

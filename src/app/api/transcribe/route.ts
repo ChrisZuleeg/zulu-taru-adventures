@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Could not extract Google Drive file ID." }, { status: 400 });
     }
 
-    const audioUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
+    const audioUrl = `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`;
     const transcript = await getAssembly().transcripts.submit({ audio_url: audioUrl, speech_models: ["universal-2"] });
     return NextResponse.json({ job_id: transcript.id });
   } catch (e) {

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import Link from "next/link";
 import Nav from "./components/Nav";
+import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -73,9 +74,19 @@ export default function RootLayout({
           <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-6">
             <Link
               href="/"
-              className="font-heading text-lg font-bold text-taru-cream hover:text-white transition-colors tracking-wide shrink-0"
+              className="flex items-center gap-3 shrink-0 group"
             >
-              Zulu and Taru&apos;s Adventures
+              <Image
+                src="/taru-logo.png"
+                alt="Zulu and Taru Adventures logo"
+                width={44}
+                height={44}
+                className="h-11 w-11 object-contain"
+                priority
+              />
+              <span className="font-heading text-lg font-bold text-taru-cream group-hover:text-white transition-colors tracking-wide">
+                Zulu and Taru&apos;s Adventures
+              </span>
             </Link>
             <Nav />
           </div>
@@ -104,6 +115,13 @@ export default function RootLayout({
             <div className="grid gap-10 md:grid-cols-4 md:gap-10">
               <div className="md:col-span-1 rounded-2xl border border-taru-cream/20 bg-black/10 p-5">
                 <div>
+                  <Image
+                    src="/taru-logo.png"
+                    alt="Taru logo"
+                    width={110}
+                    height={110}
+                    className="h-20 w-20 object-contain mb-3"
+                  />
                   <p className="text-sm tracking-[0.18em] uppercase text-taru-cream/90">
                     Zulu and Taru Adventures
                   </p>

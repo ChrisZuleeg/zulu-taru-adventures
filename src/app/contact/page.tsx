@@ -1,9 +1,38 @@
 "use client";
 
-import { useForm, ValidationError } from "@formspree/react";
+import { useState } from "react";
+
+type FormState = "idle" | "submitting" | "success" | "error";
 
 export default function Contact() {
-  const [state, handleSubmit] = useForm("xvzlqrwe");
+  const [formState, setFormState] = useState<FormState>("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  async function handleSubmit(e: React.BaseSyntheticEvent) {
+    e.preventDefault();
+    setFormState("submitting");
+
+    const form = e.currentTarget;
+    const data = {
+      name: (form.elements.namedItem("name") as HTMLInputElement).value,
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
+    };
+
+    const res = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (res.ok) {
+      setFormState("success");
+    } else {
+      const { error } = await res.json();
+      setErrorMsg(error || "Something went wrong. Please try again.");
+      setFormState("error");
+    }
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-16">
@@ -13,7 +42,7 @@ export default function Contact() {
       </p>
 
       <div className="bg-white rounded-2xl p-8 shadow-sm border border-taru-cream">
-        {state.succeeded ? (
+        {formState === "success" ? (
           <div className="text-center py-8">
             <p className="font-heading text-2xl text-taru-green mb-2">Message sent!</p>
             <p className="text-gray-500 text-sm">Zulu will get back to you from the road.</p>
@@ -48,7 +77,6 @@ export default function Contact() {
                   className="w-full border border-taru-cream rounded-lg px-4 py-2.5 text-gray-700 focus:outline-none focus:border-taru-green bg-taru-sand"
                   placeholder="your@email.com"
                 />
-                <ValidationError field="email" prefix="Email" errors={state.errors} className="text-red-500 text-xs mt-1" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-taru-green mb-1.5">
@@ -61,14 +89,18 @@ export default function Contact() {
                   className="w-full border border-taru-cream rounded-lg px-4 py-2.5 text-gray-700 focus:outline-none focus:border-taru-green bg-taru-sand resize-none"
                   placeholder="Say anything..."
                 />
-                <ValidationError field="message" prefix="Message" errors={state.errors} className="text-red-500 text-xs mt-1" />
               </div>
+
+              {formState === "error" && (
+                <p className="text-red-500 text-sm">{errorMsg}</p>
+              )}
+
               <button
                 type="submit"
-                disabled={state.submitting}
+                disabled={formState === "submitting"}
                 className="w-full bg-taru-green text-taru-cream font-semibold py-3 rounded-full hover:bg-taru-green-dark transition-colors disabled:opacity-50"
               >
-                {state.submitting ? "Sending…" : "Send Message"}
+                {formState === "submitting" ? "Sending…" : "Send Message"}
               </button>
             </form>
           </>

@@ -19,5 +19,7 @@ export type MediaItem = {
   gps_lat: number | null;
   gps_lng: number | null;
   duration_seconds: number | null;
+  transcript: string | null;
+  summary: string | null;
   created_at: string;
 };

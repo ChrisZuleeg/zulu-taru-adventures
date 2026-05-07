@@ -1,5 +1,6 @@
 import { supabase, hasSupabaseEnv, MediaItem } from "@/lib/supabase";
 import { driveEmbedUrl } from "@/lib/drive";
+import TranscribeButton from "./TranscribeButton";
 
 export const revalidate = 60;
 
@@ -74,6 +75,11 @@ export default async function Videos() {
                       <p className="font-heading font-bold text-taru-green">{video.title}</p>
                       {video.location && (
                         <p className="text-sm text-gray-500 mt-1">{video.location}</p>
+                      )}
+                      {video.summary ? (
+                        <p className="text-sm text-gray-600 mt-2 leading-relaxed italic">{video.summary}</p>
+                      ) : (
+                        <TranscribeButton id={String(video.id)} />
                       )}
                     </div>
                   </div>

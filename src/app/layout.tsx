@@ -76,14 +76,16 @@ export default function RootLayout({
               href="/"
               className="flex items-center gap-3 shrink-0 group"
             >
-              <Image
-                src="/taru-logo.png"
-                alt="Zulu and Taru Adventures logo"
-                width={44}
-                height={44}
-                className="h-11 w-11 object-contain"
-                priority
-              />
+              <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-taru-green ring-2 ring-taru-cream/30">
+                <Image
+                  src="/taru-logo.png"
+                  alt="Zulu and Taru Adventures logo"
+                  fill
+                  className="object-cover object-center scale-[1.12]"
+                  sizes="44px"
+                  priority
+                />
+              </span>
               <span className="font-heading text-lg font-bold text-taru-cream group-hover:text-white transition-colors tracking-wide">
                 Zulu and Taru&apos;s Adventures
               </span>
@@ -115,13 +117,15 @@ export default function RootLayout({
             <div className="grid gap-10 md:grid-cols-4 md:gap-10">
               <div className="md:col-span-1 rounded-2xl border border-taru-cream/20 bg-black/10 p-5">
                 <div>
-                  <Image
-                    src="/taru-logo.png"
-                    alt="Taru logo"
-                    width={110}
-                    height={110}
-                    className="h-20 w-20 object-contain mb-3"
-                  />
+                  <span className="relative mb-3 inline-block h-20 w-20 overflow-hidden rounded-full bg-taru-green/40 ring-2 ring-taru-cream/25">
+                    <Image
+                      src="/taru-logo.png"
+                      alt="Taru logo"
+                      fill
+                      className="object-cover object-center scale-[1.12]"
+                      sizes="80px"
+                    />
+                  </span>
                   <p className="text-sm tracking-[0.18em] uppercase text-taru-cream/90">
                     Zulu and Taru Adventures
                   </p>

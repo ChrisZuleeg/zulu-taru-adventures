@@ -11,13 +11,6 @@ export const maxDuration = 60;
 
 ffmpeg.setFfmpegPath(ffmpegStatic as string);
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
-);
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
 function extractAudio(url: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
@@ -38,6 +31,28 @@ function extractAudio(url: string): Promise<Buffer> {
 }
 
 export async function POST(request: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+
+  if (!supabaseUrl || !supabaseSecretKey) {
+    return NextResponse.json(
+      { error: "Supabase is not configured on this environment." },
+      { status: 500 }
+    );
+  }
+  if (!openaiKey || !anthropicKey) {
+    return NextResponse.json(
+      { error: "Transcription services are not configured on this environment." },
+      { status: 500 }
+    );
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseSecretKey);
+  const openai = new OpenAI({ apiKey: openaiKey });
+  const anthropic = new Anthropic({ apiKey: anthropicKey });
+
   const { id, password } = await request.json();
 
   if (password !== process.env.WRITE_PASSWORD) {
@@ -78,7 +93,12 @@ export async function POST(request: NextRequest) {
     response_format: "text",
   });
 
-  const transcript = typeof transcription === "string" ? transcription : (transcription as any).text;
+  const transcript =
+    typeof transcription === "string"
+      ? transcription
+      : String(
+          "text" in transcription ? (transcription as { text: string }).text : ""
+        );
 
   const message = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",

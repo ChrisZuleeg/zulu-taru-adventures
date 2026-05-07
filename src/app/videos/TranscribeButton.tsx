@@ -8,7 +8,7 @@ export default function TranscribeButton({ id }: { id: string }) {
   const [summary, setSummary] = useState("");
   const [error, setError] = useState("");
 
-  async function run() {
+  async function start() {
     setStage("working");
     setError("");
     try {
@@ -19,14 +19,34 @@ export default function TranscribeButton({ id }: { id: string }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(res.status === 401 ? "Wrong password." : data.error || "Something went wrong.");
+        setError(res.status === 401 ? "Wrong password." : data.error || "Failed to start.");
         setStage("password");
         return;
       }
-      setSummary(data.summary);
-      setStage("done");
-    } catch (e) {
-      setError("Request failed or timed out. Try again.");
+      poll(data.job_id);
+    } catch {
+      setError("Could not reach server. Try again.");
+      setStage("password");
+    }
+  }
+
+  async function poll(job_id: string) {
+    try {
+      const res = await fetch(`/api/transcribe?job_id=${job_id}&media_id=${id}`);
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Transcription failed.");
+        setStage("password");
+        return;
+      }
+      if (data.status === "completed") {
+        setSummary(data.summary);
+        setStage("done");
+        return;
+      }
+      setTimeout(() => poll(job_id), 5000);
+    } catch {
+      setError("Lost connection while waiting. Refresh and try again.");
       setStage("password");
     }
   }
@@ -44,29 +64,29 @@ export default function TranscribeButton({ id }: { id: string }) {
 
   if (stage === "password") {
     return (
-      <div className="mt-2 flex gap-2">
+      <div className="mt-2 flex gap-2 flex-wrap">
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && run()}
+          onKeyDown={(e) => e.key === "Enter" && start()}
           placeholder="Password"
           autoFocus
           className="flex-1 border border-taru-cream rounded-lg px-3 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-taru-green bg-taru-sand"
         />
         <button
-          onClick={run}
+          onClick={start}
           className="bg-taru-green text-taru-cream text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-taru-green-dark transition-colors"
         >
           Go
         </button>
-        {error && <p className="text-red-500 text-xs self-center">{error}</p>}
+        {error && <p className="w-full text-red-500 text-xs">{error}</p>}
       </div>
     );
   }
 
   if (stage === "working") {
-    return <p className="text-xs text-gray-400 mt-1 animate-pulse">Transcribing… this may take a minute.</p>;
+    return <p className="text-xs text-gray-400 mt-1 animate-pulse">Transcribing… checking every 5 seconds.</p>;
   }
 
   if (stage === "done") {

@@ -1,71 +1,31 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { AssemblyAI } from "assemblyai";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 import { driveFileId } from "@/lib/drive";
-import ffmpeg from "fluent-ffmpeg";
-import ffmpegStatic from "ffmpeg-static";
-import { PassThrough } from "stream";
 
-export const maxDuration = 60;
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SECRET_KEY!
+);
+const assembly = new AssemblyAI({ apiKey: process.env.ASSEMBLYAI_API_KEY! });
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-ffmpeg.setFfmpegPath(ffmpegStatic as string);
-
-function extractAudio(url: string): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    const pass = new PassThrough();
-    pass.on("data", (chunk: Buffer) => chunks.push(chunk));
-    pass.on("end", () => resolve(Buffer.concat(chunks)));
-    pass.on("error", reject);
-
-    ffmpeg(url)
-      .noVideo()
-      .audioCodec("libmp3lame")
-      .audioBitrate("64k")
-      .format("mp3")
-      .output(pass)
-      .on("error", reject)
-      .run();
-  });
-}
-
+// POST — submit video to AssemblyAI, returns job_id immediately
 export async function POST(request: NextRequest) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
-  const openaiKey = process.env.OPENAI_API_KEY;
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-
-  if (!supabaseUrl || !supabaseSecretKey) {
-    return NextResponse.json(
-      { error: "Supabase is not configured on this environment." },
-      { status: 500 }
-    );
-  }
-  if (!openaiKey || !anthropicKey) {
-    return NextResponse.json(
-      { error: "Transcription services are not configured on this environment." },
-      { status: 500 }
-    );
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseSecretKey);
-  const openai = new OpenAI({ apiKey: openaiKey });
-  const anthropic = new Anthropic({ apiKey: anthropicKey });
-
   const { id, password } = await request.json();
 
   if (password !== process.env.WRITE_PASSWORD) {
     return NextResponse.json({ error: "Wrong password." }, { status: 401 });
   }
 
-  const { data: video, error: fetchError } = await supabase
+  const { data: video, error } = await supabase
     .from("media")
     .select("*")
     .eq("id", id)
     .single();
 
-  if (fetchError || !video) {
+  if (error || !video) {
     return NextResponse.json({ error: "Video not found." }, { status: 404 });
   }
 
@@ -74,38 +34,39 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Could not extract Google Drive file ID." }, { status: 400 });
   }
 
-  // Stream audio directly from Google Drive — no need to download the full video
-  const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
-  const audioBuffer = await extractAudio(downloadUrl);
+  const audioUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
+  const transcript = await assembly.transcripts.submit({ audio_url: audioUrl });
+  return NextResponse.json({ job_id: transcript.id });
+}
 
-  const fileSizeMB = audioBuffer.byteLength / (1024 * 1024);
-  if (fileSizeMB > 24) {
-    return NextResponse.json({
-      error: `Audio is ${fileSizeMB.toFixed(1)}MB after extraction — clip is too long. Try a shorter video.`,
-    }, { status: 413 });
+// GET — poll job status; on completion summarise with Claude and save
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const job_id = searchParams.get("job_id");
+  const media_id = searchParams.get("media_id");
+
+  if (!job_id || !media_id) {
+    return NextResponse.json({ error: "Missing job_id or media_id." }, { status: 400 });
   }
 
-  const audioFile = new File([new Uint8Array(audioBuffer)], `${fileId}.mp3`, { type: "audio/mpeg" });
+  const transcript = await assembly.transcripts.get(job_id);
 
-  const transcription = await openai.audio.transcriptions.create({
-    file: audioFile,
-    model: "whisper-1",
-    response_format: "text",
-  });
+  if (transcript.status === "error") {
+    return NextResponse.json({ error: `Transcription failed: ${transcript.error}` }, { status: 500 });
+  }
 
-  const transcript =
-    typeof transcription === "string"
-      ? transcription
-      : String(
-          "text" in transcription ? (transcription as { text: string }).text : ""
-        );
+  if (transcript.status !== "completed") {
+    return NextResponse.json({ status: transcript.status });
+  }
+
+  const transcriptText = transcript.text ?? "";
 
   const message = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 512,
     messages: [{
       role: "user",
-      content: `This is a transcript from a GoPro video taken during a road trip through the American Southwest in a 1976 VW Westfalia. Write a short, vivid 2–3 sentence summary of what happens in the video, written in third person ("Zulu..."). Keep it evocative and road-trip-y. Return only the summary, nothing else.\n\nTranscript:\n${transcript}`,
+      content: `This is a transcript from a GoPro video taken during a road trip through the American Southwest in a 1976 VW Westfalia. Write a short, vivid 2–3 sentence summary of what happens in the video, written in third person ("Zulu..."). Keep it evocative and road-trip-y. Return only the summary, nothing else.\n\nTranscript:\n${transcriptText}`,
     }],
   });
 
@@ -113,8 +74,8 @@ export async function POST(request: NextRequest) {
 
   await supabase
     .from("media")
-    .update({ transcript, summary })
-    .eq("id", id);
+    .update({ transcript: transcriptText, summary })
+    .eq("id", media_id);
 
-  return NextResponse.json({ transcript, summary });
+  return NextResponse.json({ status: "completed", summary, transcript: transcriptText });
 }

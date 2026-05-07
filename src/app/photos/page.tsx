@@ -40,6 +40,18 @@ function buildImageCandidates(photo: MediaItem): string[] {
   return candidates.filter(Boolean);
 }
 
+function groupByDate(items: MediaItem[]) {
+  const groups = new Map<string, MediaItem[]>();
+  for (const item of items) {
+    const key = item.filmed_at
+      ? new Date(item.filmed_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+      : "Undated";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(item);
+  }
+  return Array.from(groups.entries()).map(([date, items]) => ({ date, items }));
+}
+
 export default async function Photos() {
   let photos: MediaItem[] | null = null;
 
@@ -77,30 +89,38 @@ export default async function Photos() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {photos.map((photo) => {
-            const imageCandidates = buildImageCandidates(photo);
-
-            return (
-              <a
-                key={photo.id}
-                href={photo.r2_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative aspect-square overflow-hidden rounded-xl bg-taru-cream"
-              >
-                <PhotoTileImage candidates={imageCandidates} alt={photo.title} />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-end">
-                  <div className="p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                    <p className="text-white text-sm font-semibold">{photo.title}</p>
-                    {photo.location && (
-                      <p className="text-white/80 text-xs">{photo.location}</p>
-                    )}
-                  </div>
-                </div>
-              </a>
-            );
-          })}
+        <div className="space-y-12">
+          {groupByDate(photos).map(({ date, items }) => (
+            <div key={date}>
+              <h2 className="font-heading text-xl text-taru-green mb-5 pb-2 border-b border-taru-cream">
+                {date}
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {items.map((photo) => {
+                  const imageCandidates = buildImageCandidates(photo);
+                  return (
+                    <a
+                      key={photo.id}
+                      href={photo.r2_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative aspect-square overflow-hidden rounded-xl bg-taru-cream"
+                    >
+                      <PhotoTileImage candidates={imageCandidates} alt={photo.title} />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-end">
+                        <div className="p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                          <p className="text-white text-sm font-semibold">{photo.title}</p>
+                          {photo.location && (
+                            <p className="text-white/80 text-xs">{photo.location}</p>
+                          )}
+                        </div>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

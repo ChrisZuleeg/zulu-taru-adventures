@@ -3,6 +3,18 @@ import { driveEmbedUrl } from "@/lib/drive";
 
 export const revalidate = 60;
 
+function groupByDate(items: MediaItem[]) {
+  const groups = new Map<string, MediaItem[]>();
+  for (const item of items) {
+    const key = item.filmed_at
+      ? new Date(item.filmed_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+      : "Undated";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(item);
+  }
+  return Array.from(groups.entries()).map(([date, items]) => ({ date, items }));
+}
+
 export default async function Videos() {
   let videos: MediaItem[] | null = null;
 
@@ -40,34 +52,32 @@ export default async function Videos() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-          {videos.map((video) => (
-            <div
-              key={video.id}
-              className="bg-white rounded-2xl overflow-hidden border border-taru-cream/60 shadow-sm"
-            >
-              <iframe
-                src={driveEmbedUrl(video.r2_url)}
-                className="w-full aspect-video"
-                allow="autoplay"
-                allowFullScreen
-              />
-              <div className="p-4">
-                <p className="font-heading font-bold text-taru-green">
-                  {video.title}
-                </p>
-                {video.location && (
-                  <p className="text-sm text-gray-500 mt-1">{video.location}</p>
-                )}
-                {video.filmed_at && (
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {new Date(video.filmed_at).toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
-                )}
+        <div className="space-y-12">
+          {groupByDate(videos).map(({ date, items }) => (
+            <div key={date}>
+              <h2 className="font-heading text-xl text-taru-green mb-5 pb-2 border-b border-taru-cream">
+                {date}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                {items.map((video) => (
+                  <div
+                    key={video.id}
+                    className="bg-white rounded-2xl overflow-hidden border border-taru-cream/60 shadow-sm"
+                  >
+                    <iframe
+                      src={driveEmbedUrl(video.r2_url)}
+                      className="w-full aspect-video"
+                      allow="autoplay"
+                      allowFullScreen
+                    />
+                    <div className="p-4">
+                      <p className="font-heading font-bold text-taru-green">{video.title}</p>
+                      {video.location && (
+                        <p className="text-sm text-gray-500 mt-1">{video.location}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}

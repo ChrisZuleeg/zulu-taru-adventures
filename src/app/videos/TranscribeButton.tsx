@@ -11,19 +11,24 @@ export default function TranscribeButton({ id }: { id: string }) {
   async function run() {
     setStage("working");
     setError("");
-    const res = await fetch("/api/transcribe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(res.status === 401 ? "Wrong password." : data.error || "Something went wrong.");
+    try {
+      const res = await fetch("/api/transcribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(res.status === 401 ? "Wrong password." : data.error || "Something went wrong.");
+        setStage("password");
+        return;
+      }
+      setSummary(data.summary);
+      setStage("done");
+    } catch (e) {
+      setError("Request failed or timed out. Try again.");
       setStage("password");
-      return;
     }
-    setSummary(data.summary);
-    setStage("done");
   }
 
   if (stage === "idle") {

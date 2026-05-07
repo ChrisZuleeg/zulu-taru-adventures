@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { driveFileId } from "@/lib/drive";
 
+export const maxDuration = 60;
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SECRET_KEY!
@@ -35,13 +37,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Could not extract Google Drive file ID." }, { status: 400 });
   }
 
-  const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-  const videoRes = await fetch(downloadUrl);
+  // confirm=t bypasses Google's virus scan warning for large files
+  const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
+  const videoRes = await fetch(downloadUrl, { redirect: "follow" });
   if (!videoRes.ok) {
-    return NextResponse.json({ error: "Failed to download video from Google Drive." }, { status: 502 });
+    return NextResponse.json({ error: `Google Drive download failed (${videoRes.status}).` }, { status: 502 });
   }
 
   const videoBuffer = await videoRes.arrayBuffer();
+  const fileSizeMB = videoBuffer.byteLength / (1024 * 1024);
+
+  if (fileSizeMB > 24) {
+    return NextResponse.json({
+      error: `Video is ${fileSizeMB.toFixed(0)}MB — Whisper's limit is 25MB. Use a shorter clip or reduce GoPro resolution before uploading.`,
+    }, { status: 413 });
+  }
+
   const videoFile = new File([videoBuffer], `${fileId}.mp4`, { type: "video/mp4" });
 
   // Transcribe with Whisper

@@ -82,7 +82,7 @@ export default function RootLayout({
         <main className="flex-1">{children}</main>
 
         <footer className="mt-20 border-t-4 border-taru-cream-dark bg-gradient-to-br from-[#3A4417] via-taru-green-dark to-[#1f250c] text-taru-cream">
-          <div className="max-w-6xl mx-auto px-6 pt-14 pb-8">
+          <div className="w-full px-6 md:px-10 lg:px-12 pt-14 pb-8">
             <div className="mb-10 rounded-2xl border border-taru-cream/20 bg-taru-cream/8 p-6 md:p-7">
               <p className="text-[11px] uppercase tracking-[0.24em] text-taru-cream/65 mb-2 inline-flex items-center gap-2">
                 <span aria-hidden>*</span>

@@ -1,5 +1,10 @@
 import { supabase, hasSupabaseEnv, MediaItem } from "@/lib/supabase";
-import { driveThumbnailUrl } from "@/lib/drive";
+import {
+  driveDirectImageUrl,
+  driveThumbnailUrl,
+  imageProxyJpegUrl,
+} from "@/lib/drive";
+import PhotoTileImage from "./PhotoTileImage";
 
 export const revalidate = 60;
 
@@ -7,6 +12,32 @@ function isHeicLike(url: string | null | undefined): boolean {
   if (!url) return false;
   const normalized = url.toLowerCase();
   return normalized.includes(".heic") || normalized.includes(".heif");
+}
+
+function buildImageCandidates(photo: MediaItem): string[] {
+  const hasHeicSource = isHeicLike(photo.thumbnail_url) || isHeicLike(photo.r2_url);
+  const candidates = hasHeicSource
+    ? [
+        driveThumbnailUrl(photo.thumbnail_url || ""),
+        driveDirectImageUrl(photo.thumbnail_url || ""),
+        driveThumbnailUrl(photo.r2_url),
+        driveDirectImageUrl(photo.r2_url),
+        imageProxyJpegUrl(photo.thumbnail_url || ""),
+        imageProxyJpegUrl(photo.r2_url),
+        photo.thumbnail_url || "",
+        photo.r2_url,
+      ]
+    : [
+        photo.thumbnail_url || "",
+        driveThumbnailUrl(photo.thumbnail_url || ""),
+        driveThumbnailUrl(photo.r2_url),
+        driveDirectImageUrl(photo.r2_url),
+        imageProxyJpegUrl(photo.thumbnail_url || ""),
+        imageProxyJpegUrl(photo.r2_url),
+        photo.r2_url,
+      ];
+
+  return candidates.filter(Boolean);
 }
 
 export default async function Photos() {
@@ -48,10 +79,7 @@ export default async function Photos() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {photos.map((photo) => {
-            const driveThumb = driveThumbnailUrl(photo.r2_url);
-            const thumbnailSrc = isHeicLike(photo.thumbnail_url)
-              ? driveThumb
-              : photo.thumbnail_url || driveThumb;
+            const imageCandidates = buildImageCandidates(photo);
 
             return (
               <a
@@ -61,11 +89,7 @@ export default async function Photos() {
                 rel="noopener noreferrer"
                 className="group relative aspect-square overflow-hidden rounded-xl bg-taru-cream"
               >
-                <img
-                  src={thumbnailSrc}
-                  alt={photo.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+                <PhotoTileImage candidates={imageCandidates} alt={photo.title} />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-end">
                   <div className="p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                     <p className="text-white text-sm font-semibold">{photo.title}</p>

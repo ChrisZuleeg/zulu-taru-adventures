@@ -27,3 +27,13 @@ export function driveThumbnailUrl(url: string): string {
   const id = driveFileId(url);
   return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w600` : url;
 }
+
+export function driveDirectImageUrl(url: string): string {
+  const id = driveFileId(url);
+  return id ? `https://lh3.googleusercontent.com/d/${id}=w1200` : url;
+}
+
+export function imageProxyJpegUrl(url: string): string {
+  if (!url) return url;
+  return `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=jpg&q=85`;
+}

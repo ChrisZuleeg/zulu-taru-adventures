@@ -102,7 +102,19 @@ export default function RootLayout({
             <div className="grid gap-10 md:grid-cols-3 md:gap-12">
               <div className="md:col-span-1">
                 <h3 className="font-heading text-2xl text-taru-cream mb-4 inline-flex items-center gap-2.5">
-                  <span aria-hidden className="text-lg text-taru-cream/85">[N]</span>
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4 text-taru-cream/85"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="8" />
+                    <path d="M12 7l3 8-8-3 5-5z" />
+                  </svg>
                   <span>Expedition Log</span>
                 </h3>
                 <ul className="space-y-2.5">
@@ -117,7 +129,19 @@ export default function RootLayout({
 
               <div>
                 <h3 className="font-heading text-xl text-taru-cream mb-4 inline-flex items-center gap-2">
-                  <span aria-hidden>[J]</span>
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4 text-taru-cream/85"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M4 5a2 2 0 0 1 2-2h5v17H6a2 2 0 0 0-2 2z" />
+                    <path d="M20 5a2 2 0 0 0-2-2h-5v17h5a2 2 0 0 1 2 2z" />
+                  </svg>
                   <span>Read the Chapters</span>
                 </h3>
                 <ul className="space-y-2.5">
@@ -137,7 +161,19 @@ export default function RootLayout({
 
               <div>
                 <h3 className="font-heading text-xl text-taru-cream mb-4 inline-flex items-center gap-2">
-                  <span aria-hidden>[M]</span>
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4 text-taru-cream/85"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z" />
+                    <circle cx="12" cy="10" r="2.5" />
+                  </svg>
                   <span>Current Route Desk</span>
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -155,7 +191,18 @@ export default function RootLayout({
                   texture of life on the move.
                 </p>
                 <div className="mt-4 inline-flex items-center gap-2 text-xs text-taru-cream/70">
-                  <span aria-hidden>[+]</span>
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 24 24"
+                    className="h-3.5 w-3.5 text-taru-cream/80"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
                   <span>Live notes from the road</span>
                 </div>
               </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import Link from "next/link";
 import Nav from "./components/Nav";
+import TrackPageView from "./components/TrackPageView";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { config } from "@fortawesome/fontawesome-svg-core";
@@ -94,6 +95,7 @@ export default function RootLayout({
           </div>
         </header>
 
+        <TrackPageView />
         <main className="flex-1">{children}</main>
 
         <footer className="mt-20 border-t-4 border-taru-cream-dark bg-gradient-to-br from-[#3A4417] via-taru-green-dark to-[#1f250c] text-taru-cream">

@@ -1,16 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function SummaryBlock({ id, summary }: { id: string; summary: string }) {
-  const router = useRouter();
-  const [deleting, setDeleting] = useState(false);
+  const [mode, setMode] = useState<"show" | "confirm" | "working">("show");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   async function confirmDelete() {
-    setDeleting(false);
+    setMode("working");
     setError("");
     const res = await fetch("/api/transcribe", {
       method: "DELETE",
@@ -20,13 +18,13 @@ export default function SummaryBlock({ id, summary }: { id: string; summary: str
     const data = await res.json();
     if (!res.ok) {
       setError(res.status === 401 ? "Wrong password." : data.error || "Delete failed.");
-      setDeleting(true);
+      setMode("confirm");
       return;
     }
-    router.refresh();
+    window.location.reload();
   }
 
-  if (deleting) {
+  if (mode === "confirm") {
     return (
       <div className="mt-2">
         <p className="text-xs text-gray-500 mb-1">Enter password to delete this summary:</p>
@@ -47,7 +45,7 @@ export default function SummaryBlock({ id, summary }: { id: string; summary: str
             Delete
           </button>
           <button
-            onClick={() => { setDeleting(false); setError(""); }}
+            onClick={() => { setMode("show"); setError(""); }}
             className="text-xs text-gray-400 hover:text-gray-600 px-2"
           >
             Cancel
@@ -58,11 +56,15 @@ export default function SummaryBlock({ id, summary }: { id: string; summary: str
     );
   }
 
+  if (mode === "working") {
+    return <p className="text-xs text-gray-400 mt-1 animate-pulse">Deleting…</p>;
+  }
+
   return (
-    <div className="mt-2 group relative">
+    <div className="mt-2">
       <p className="text-sm text-gray-600 leading-relaxed italic">{summary}</p>
       <button
-        onClick={() => setDeleting(true)}
+        onClick={() => setMode("confirm")}
         className="mt-1 text-xs text-gray-300 hover:text-red-400 transition-colors"
       >
         ✕ delete summary

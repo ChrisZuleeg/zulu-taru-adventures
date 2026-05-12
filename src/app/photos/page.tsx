@@ -4,7 +4,7 @@ import {
   driveThumbnailUrl,
   imageProxyJpegUrl,
 } from "@/lib/drive";
-import PhotoTileImage from "./PhotoTileImage";
+import PhotoDateGroup, { type PhotoTile } from "./PhotoDateGroup";
 
 export const revalidate = 60;
 
@@ -40,16 +40,69 @@ function buildImageCandidates(photo: MediaItem): string[] {
   return candidates.filter(Boolean);
 }
 
-function groupByDate(items: MediaItem[]) {
+/** Calendar day in local timezone — stable group + sort key */
+function dayKey(filmedAt: string | null): string {
+  if (!filmedAt) return "__undated__";
+  const d = new Date(filmedAt);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function dateLabelForDayKey(dayKey: string): string {
+  if (dayKey === "__undated__") return "Undated";
+  const [y, m, d] = dayKey.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
+
+/** Newest capture time first; items without filmed_at last; tie-break with created_at */
+function sortByCaptureDateDesc(photos: MediaItem[]): MediaItem[] {
+  return [...photos].sort((a, b) => {
+    const aHas = Boolean(a.filmed_at);
+    const bHas = Boolean(b.filmed_at);
+    if (!aHas && !bHas) {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
+    if (!aHas) return 1;
+    if (!bHas) return -1;
+    const diff = new Date(b.filmed_at!).getTime() - new Date(a.filmed_at!).getTime();
+    if (diff !== 0) return diff;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+}
+
+function buildPhotoSections(photos: MediaItem[]) {
+  const sorted = sortByCaptureDateDesc(photos);
   const groups = new Map<string, MediaItem[]>();
-  for (const item of items) {
-    const key = item.filmed_at
-      ? new Date(item.filmed_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
-      : "Undated";
+  for (const item of sorted) {
+    const key = dayKey(item.filmed_at);
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(item);
   }
-  return Array.from(groups.entries()).map(([date, items]) => ({ date, items }));
+
+  const keys = Array.from(groups.keys()).filter((k) => k !== "__undated__");
+  keys.sort((a, b) => b.localeCompare(a));
+  const orderedKeys = [...keys];
+  if (groups.has("__undated__")) orderedKeys.push("__undated__");
+
+  return orderedKeys.map((key) => {
+    const items = groups.get(key)!;
+    const tiles: PhotoTile[] = items.map((photo) => ({
+      id: photo.id,
+      title: photo.title,
+      location: photo.location,
+      r2_url: photo.r2_url,
+      candidates: buildImageCandidates(photo),
+    }));
+    const sectionId = key === "__undated__" ? "undated" : key;
+    return {
+      sectionId,
+      dateLabel: dateLabelForDayKey(key),
+      photos: tiles,
+    };
+  });
 }
 
 export default async function Photos() {
@@ -60,7 +113,8 @@ export default async function Photos() {
       .from("media")
       .select("*")
       .eq("type", "photo")
-      .order("filmed_at", { ascending: false });
+      .order("filmed_at", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false });
     photos = (data as MediaItem[]) || [];
   }
 
@@ -90,36 +144,13 @@ export default async function Photos() {
         </div>
       ) : (
         <div className="space-y-12">
-          {groupByDate(photos).map(({ date, items }) => (
-            <div key={date}>
-              <h2 className="font-heading text-xl text-taru-green mb-5 pb-2 border-b border-taru-cream">
-                {date}
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {items.map((photo) => {
-                  const imageCandidates = buildImageCandidates(photo);
-                  return (
-                    <a
-                      key={photo.id}
-                      href={photo.r2_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group relative aspect-square overflow-hidden rounded-xl bg-taru-cream"
-                    >
-                      <PhotoTileImage candidates={imageCandidates} alt={photo.title} />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-end">
-                        <div className="p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                          <p className="text-white text-sm font-semibold">{photo.title}</p>
-                          {photo.location && (
-                            <p className="text-white/80 text-xs">{photo.location}</p>
-                          )}
-                        </div>
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
+          {buildPhotoSections(photos).map(({ sectionId, dateLabel, photos: tiles }) => (
+            <PhotoDateGroup
+              key={sectionId}
+              sectionId={sectionId}
+              dateLabel={dateLabel}
+              photos={tiles}
+            />
           ))}
         </div>
       )}

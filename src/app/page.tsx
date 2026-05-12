@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { taruHeroBlurDataUrl } from "@/lib/taru-hero-blur-data-url";
 
 export default function Home() {
   const stops = [
@@ -23,7 +24,10 @@ export default function Home() {
           alt="Taru, a 1976 VW Westfalia"
           fill
           className="object-cover"
+          sizes="100vw"
           priority
+          placeholder="blur"
+          blurDataURL={taruHeroBlurDataUrl}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
         <div className="relative z-10 px-8 md:px-16 pb-16 md:pb-20 max-w-2xl">

@@ -1,7 +1,8 @@
 import { supabase, hasSupabaseEnv, MediaItem } from "@/lib/supabase";
-import { driveEmbedUrl } from "@/lib/drive";
+import { driveEmbedUrl, driveThumbnailUrl } from "@/lib/drive";
 import TranscribeButton from "./TranscribeButton";
 import SummaryBlock from "./SummaryBlock";
+import VideoLazyEmbed from "./VideoLazyEmbed";
 
 export const revalidate = 60;
 
@@ -23,9 +24,10 @@ export default async function Videos() {
   if (supabase) {
     const { data } = await supabase
       .from("media")
-      .select("*")
+      .select("id,title,location,filmed_at,r2_url,summary,created_at")
       .eq("type", "video")
-      .order("filmed_at", { ascending: false });
+      .order("filmed_at", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false });
     videos = (data as MediaItem[]) || [];
   }
 
@@ -66,11 +68,10 @@ export default async function Videos() {
                     key={video.id}
                     className="bg-white rounded-2xl overflow-hidden border border-taru-cream/60 shadow-sm"
                   >
-                    <iframe
-                      src={driveEmbedUrl(video.r2_url)}
-                      className="w-full aspect-video"
-                      allow="autoplay"
-                      allowFullScreen
+                    <VideoLazyEmbed
+                      embedSrc={driveEmbedUrl(video.r2_url)}
+                      posterSrc={driveThumbnailUrl(video.r2_url)}
+                      title={video.title}
                     />
                     <div className="p-4">
                       <p className="font-heading font-bold text-taru-green">{video.title}</p>

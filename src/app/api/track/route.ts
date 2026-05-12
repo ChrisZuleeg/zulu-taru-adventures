@@ -2,13 +2,15 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "crypto";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
-);
-
 export async function POST(request: NextRequest) {
   try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
+    if (!supabaseUrl || !supabaseSecretKey) {
+      return NextResponse.json({ ok: false });
+    }
+    const supabase = createClient(supabaseUrl, supabaseSecretKey);
+
     const { page } = await request.json();
 
     const country = request.headers.get("x-vercel-ip-country") ?? null;

@@ -4,22 +4,30 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { driveFileId } from "@/lib/drive";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
-);
-
 function getAssembly() {
   const key = process.env.ASSEMBLYAI_API_KEY;
   if (!key) throw new Error("ASSEMBLYAI_API_KEY env var is not set in Vercel.");
   return new AssemblyAI({ apiKey: key });
 }
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
 
 // POST — submit video to AssemblyAI, returns job_id immediately
 export async function POST(request: NextRequest) {
   try {
+    const supabase = getSupabase();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Supabase is not configured on this environment." },
+        { status: 500 }
+      );
+    }
+
     const { id, password } = await request.json();
 
     if (password !== process.env.WRITE_PASSWORD) {
@@ -71,6 +79,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ status: transcript.status });
   }
 
+  const supabase = getSupabase();
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (!supabase || !anthropicKey) {
+    return NextResponse.json(
+      { error: "Supabase or Anthropic is not configured on this environment." },
+      { status: 500 }
+    );
+  }
+  const anthropic = new Anthropic({ apiKey: anthropicKey });
+
   const transcriptText = transcript.text ?? "";
 
   const message = await anthropic.messages.create({
@@ -95,6 +113,14 @@ export async function GET(request: NextRequest) {
 // DELETE — clear transcript and summary so the video can be re-transcribed
 export async function DELETE(request: NextRequest) {
   try {
+    const supabase = getSupabase();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Supabase is not configured on this environment." },
+        { status: 500 }
+      );
+    }
+
     const { id, password } = await request.json();
     if (password !== process.env.WRITE_PASSWORD) {
       return NextResponse.json({ error: "Wrong password." }, { status: 401 });

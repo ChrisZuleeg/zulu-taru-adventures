@@ -21,13 +21,13 @@ function usePrefersReducedMotion(): boolean {
   );
 }
 
-const VISIBLE_RATIO = 0.45;
+/** Drive /preview + ?autoplay=1 is unreliable and often spins forever; keep plain preview. */
+const VISIBLE_RATIO = 0.2;
 
 /**
  * Drive preview iframes are heavy. Default: poster + tap to play.
  * With activateOnScroll: iframe mounts when the block is sufficiently visible,
- * unmounts when scrolled away to cap memory/network. Google may or may not
- * honor autoplay=1 inside the embed; muted autoplay policies still apply.
+ * unmounts when scrolled away to cap memory/network.
  */
 export default function VideoLazyEmbed({
   embedSrc,
@@ -50,7 +50,11 @@ export default function VideoLazyEmbed({
         if (!e) return;
         setActive(e.isIntersecting && e.intersectionRatio >= VISIBLE_RATIO);
       },
-      { threshold: [0, 0.15, VISIBLE_RATIO, 0.55, 0.75, 1] },
+      {
+        root: null,
+        rootMargin: "80px 0px",
+        threshold: [0, 0.05, 0.1, 0.2, 0.35, 0.5, 0.65, 0.8, 1],
+      },
     );
     obs.observe(el);
     return () => obs.disconnect();

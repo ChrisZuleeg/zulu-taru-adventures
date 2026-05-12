@@ -69,7 +69,7 @@ export default async function Videos() {
                     className="bg-white rounded-2xl overflow-hidden border border-taru-cream/60 shadow-sm"
                   >
                     <VideoLazyEmbed
-                      embedSrc={driveEmbedUrl(video.r2_url, { autoplay: true })}
+                      embedSrc={driveEmbedUrl(video.r2_url)}
                       posterSrc={driveThumbnailUrl(video.r2_url)}
                       activateOnScroll
                     />

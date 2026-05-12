@@ -62,7 +62,17 @@ export default function Home() {
       {/* Intro */}
       <section className="max-w-5xl mx-auto px-6 py-20">
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-14 lg:items-center">
-          <div className="text-center lg:text-left">
+          <div className="order-2 flex justify-center lg:order-1 lg:justify-start">
+            <Image
+              src="/taru-trip-van.png"
+              alt="Side profile illustration of Taru, the 1976 VW Westfalia camper van"
+              width={1024}
+              height={768}
+              sizes="(max-width: 1024px) 100vw, 480px"
+              className="w-full max-w-md lg:max-w-lg h-auto object-contain drop-shadow-[0_12px_40px_rgba(58,68,23,0.18)]"
+            />
+          </div>
+          <div className="order-1 text-center lg:order-2 lg:text-left">
             <h2 className="font-heading text-4xl font-bold text-taru-green mb-6">
               The Trip of a Lifetime
             </h2>
@@ -76,16 +86,6 @@ export default function Home() {
               the campfire, photos from every stop, and the occasional hot spring
               soak.
             </p>
-          </div>
-          <div className="flex justify-center lg:justify-end">
-            <Image
-              src="/taru-trip-van.png"
-              alt="Side profile illustration of Taru, the 1976 VW Westfalia camper van"
-              width={1024}
-              height={768}
-              sizes="(max-width: 1024px) 100vw, 480px"
-              className="w-full max-w-md lg:max-w-lg h-auto object-contain drop-shadow-[0_12px_40px_rgba(58,68,23,0.18)]"
-            />
           </div>
         </div>
       </section>

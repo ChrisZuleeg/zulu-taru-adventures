@@ -228,8 +228,7 @@ export default function RootLayout({
 
             <div className="mt-12 border-t border-taru-cream/20 pt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs tracking-wide text-taru-cream/70">
-                © {new Date().getFullYear()} Zulu and Taru&apos;s Adventures. All
-                rights reserved. Built from the road, one story at a time.
+                © {new Date().getFullYear()}{' '}Zulu and Taru&apos;s Adventures. All rights reserved. Built from the road, one story at a time.
               </p>
               <div className="flex items-center gap-5 text-xs text-taru-cream/70">
                 <Link href="/contact" className="hover:text-white transition-colors">

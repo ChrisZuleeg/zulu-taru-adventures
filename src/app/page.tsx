@@ -60,20 +60,34 @@ export default function Home() {
       </section>
 
       {/* Intro */}
-      <section className="max-w-2xl mx-auto px-6 py-20 text-center">
-        <h2 className="font-heading text-4xl font-bold text-taru-green mb-6">
-          The Trip of a Lifetime
-        </h2>
-        <p className="text-lg text-gray-600 leading-relaxed mb-4">
-          After 11 years of adventures together, Zulu and Taru are hitting the
-          open road for their biggest journey yet. Fresh out of retirement and
-          with a newly rebuilt engine, Taru is ready for the American Southwest.
-        </p>
-        <p className="text-lg text-gray-600 leading-relaxed">
-          Follow along for GoPro footage from the road, journal entries from
-          the campfire, photos from every stop, and the occasional hot spring
-          soak.
-        </p>
+      <section className="max-w-5xl mx-auto px-6 py-20">
+        <div className="grid gap-10 lg:grid-cols-2 lg:gap-14 lg:items-center">
+          <div className="text-center lg:text-left">
+            <h2 className="font-heading text-4xl font-bold text-taru-green mb-6">
+              The Trip of a Lifetime
+            </h2>
+            <p className="text-lg text-gray-600 leading-relaxed mb-4">
+              After 11 years of adventures together, Zulu and Taru are hitting the
+              open road for their biggest journey yet. Fresh out of retirement and
+              with a newly rebuilt engine, Taru is ready for the American Southwest.
+            </p>
+            <p className="text-lg text-gray-600 leading-relaxed">
+              Follow along for GoPro footage from the road, journal entries from
+              the campfire, photos from every stop, and the occasional hot spring
+              soak.
+            </p>
+          </div>
+          <div className="flex justify-center lg:justify-end">
+            <Image
+              src="/taru-trip-van.png"
+              alt="Side profile illustration of Taru, the 1976 VW Westfalia camper van"
+              width={1024}
+              height={768}
+              sizes="(max-width: 1024px) 100vw, 480px"
+              className="w-full max-w-md lg:max-w-lg h-auto object-contain drop-shadow-[0_12px_40px_rgba(58,68,23,0.18)]"
+            />
+          </div>
+        </div>
       </section>
 
       {/* Route strip */}

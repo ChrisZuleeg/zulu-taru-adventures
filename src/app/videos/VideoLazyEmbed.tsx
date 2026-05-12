@@ -5,14 +5,13 @@ import { useState } from "react";
 type VideoLazyEmbedProps = {
   embedSrc: string;
   posterSrc: string;
-  title: string;
 };
 
 /**
  * Drive preview iframes are very heavy. We show a static poster first and only
  * mount the iframe after the user taps play, so the page stays fast.
  */
-export default function VideoLazyEmbed({ embedSrc, posterSrc, title }: VideoLazyEmbedProps) {
+export default function VideoLazyEmbed({ embedSrc, posterSrc }: VideoLazyEmbedProps) {
   const [active, setActive] = useState(false);
 
   if (active) {
@@ -22,7 +21,7 @@ export default function VideoLazyEmbed({ embedSrc, posterSrc, title }: VideoLazy
         className="w-full aspect-video border-0"
         allow="autoplay; fullscreen; encrypted-media"
         allowFullScreen
-        title={title}
+        title="Video player"
       />
     );
   }
@@ -32,7 +31,7 @@ export default function VideoLazyEmbed({ embedSrc, posterSrc, title }: VideoLazy
       type="button"
       onClick={() => setActive(true)}
       className="relative block w-full overflow-hidden rounded-none bg-taru-cream text-left aspect-video group focus:outline-none focus-visible:ring-2 focus-visible:ring-taru-green focus-visible:ring-offset-2"
-      aria-label={`Play video: ${title}`}
+      aria-label="Play video"
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- external Drive URLs; avoid image optimizer config */}
       <img

@@ -24,7 +24,7 @@ export default async function Videos() {
   if (supabase) {
     const { data } = await supabase
       .from("media")
-      .select("id,title,location,filmed_at,r2_url,summary,created_at")
+      .select("id,location,filmed_at,r2_url,summary,created_at")
       .eq("type", "video")
       .order("filmed_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false });
@@ -71,12 +71,10 @@ export default async function Videos() {
                     <VideoLazyEmbed
                       embedSrc={driveEmbedUrl(video.r2_url)}
                       posterSrc={driveThumbnailUrl(video.r2_url)}
-                      title={video.title}
                     />
                     <div className="p-4">
-                      <p className="font-heading font-bold text-taru-green">{video.title}</p>
                       {video.location && (
-                        <p className="text-sm text-gray-500 mt-1">{video.location}</p>
+                        <p className="text-sm text-gray-500 mb-2">{video.location}</p>
                       )}
                       {video.summary ? (
                         <SummaryBlock id={String(video.id)} summary={video.summary} />

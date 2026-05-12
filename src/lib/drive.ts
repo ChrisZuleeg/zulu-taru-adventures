@@ -18,9 +18,11 @@ export function driveFileId(url: string): string | null {
   return fallbackPathMatch ? fallbackPathMatch[1] : null;
 }
 
-export function driveEmbedUrl(url: string): string {
+export function driveEmbedUrl(url: string, opts?: { autoplay?: boolean }): string {
   const id = driveFileId(url);
-  return id ? `https://drive.google.com/file/d/${id}/preview` : url;
+  if (!id) return url;
+  const base = `https://drive.google.com/file/d/${id}/preview`;
+  return opts?.autoplay ? `${base}?autoplay=1` : base;
 }
 
 export function driveThumbnailUrl(url: string): string {

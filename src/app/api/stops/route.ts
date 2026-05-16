@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = createClient(supabaseUrl, supabaseSecretKey);
-  const { password, name, state, lat, lng } = await request.json();
+  const { password, name, state, lat, lng, photo } = await request.json();
 
   if (password !== process.env.WRITE_PASSWORD) {
     return NextResponse.json({ error: "Wrong password." }, { status: 401 });
@@ -21,6 +21,23 @@ export async function POST(request: NextRequest) {
 
   if (!name?.trim() || !lat || !lng) {
     return NextResponse.json({ error: "Name and location are required." }, { status: 400 });
+  }
+
+  // Upload photo to Supabase Storage if provided
+  let photo_url: string | null = null;
+  if (photo) {
+    const base64Data = photo.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = Buffer.from(base64Data, "base64");
+    const filename = `${Date.now()}.jpg`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("stop-photos")
+      .upload(filename, buffer, { contentType: "image/jpeg" });
+    if (!uploadError && uploadData) {
+      const { data: { publicUrl } } = supabase.storage
+        .from("stop-photos")
+        .getPublicUrl(uploadData.path);
+      photo_url = publicUrl;
+    }
   }
 
   // Find the last visited stop to insert after it
@@ -48,7 +65,7 @@ export async function POST(request: NextRequest) {
 
   const { data, error } = await supabase
     .from("stops")
-    .insert({ order_num, name, state: state || "", lat, lng, visited: true, visited_at: new Date().toISOString() })
+    .insert({ order_num, name, state: state || "", lat, lng, visited: true, visited_at: new Date().toISOString(), photo_url })
     .select()
     .single();
 

@@ -171,14 +171,19 @@ export default function Checkin() {
                 : "bg-white border-taru-cream hover:border-taru-green text-gray-700"
               } ${updating === stop.id ? "opacity-50" : ""}`}
           >
-            {stop.photo_url && (
-              <img
-                src={stop.photo_url}
-                alt={stop.name}
-                className="w-12 h-12 rounded-xl object-cover shrink-0"
-              />
-            )}
-            {!stop.photo_url && (
+            {stop.photo_url ? (
+              <div className="relative shrink-0">
+                <img
+                  src={stop.photo_url}
+                  alt={stop.name}
+                  className="w-12 h-12 rounded-xl object-cover"
+                />
+                <span className={`absolute -bottom-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shadow
+                  ${stop.visited ? "bg-white text-taru-green" : "bg-taru-cream text-taru-green"}`}>
+                  {stop.order_num}
+                </span>
+              </div>
+            ) : (
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0
                 ${stop.visited ? "bg-white text-taru-green" : "bg-taru-cream text-taru-green"}`}>
                 {stop.order_num}

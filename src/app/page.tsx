@@ -43,7 +43,7 @@ export default function Home() {
             Adventures
           </h1>
           <p className="text-white/80 text-lg mb-8 leading-relaxed max-w-lg">
-            One newly retired human. One beloved 1976 VW Westfalia. Four weeks
+            One newly retired human. One beloved 1976 VW Westfalia. Five weeks
             across the American Southwest.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -58,6 +58,18 @@ export default function Home() {
               className="border-2 border-taru-cream/70 text-taru-cream font-semibold px-7 py-3 rounded-full hover:bg-white/10 hover:border-white transition-colors text-sm"
             >
               View the Route
+            </a>
+            <a
+              href="/photos"
+              className="bg-taru-brown text-white font-semibold px-7 py-3 rounded-full hover:brightness-110 transition-all shadow-lg text-sm"
+            >
+              📷 Photos
+            </a>
+            <a
+              href="/videos"
+              className="bg-taru-green text-taru-cream font-semibold px-7 py-3 rounded-full hover:bg-taru-green-dark transition-colors shadow-lg text-sm border-2 border-taru-cream/40"
+            >
+              🎬 Videos
             </a>
           </div>
         </div>

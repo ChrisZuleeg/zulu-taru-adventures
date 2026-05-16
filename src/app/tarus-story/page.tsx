@@ -32,7 +32,7 @@ export default function TarusStory() {
         <p>
           Earlier this year, Taru got a gift: a complete engine rebuild by the
           experts at Peninsula Automotive. She runs like new — better than new, even.
-          The rebuilt engine is ready to take on four weeks of American Southwest
+          The rebuilt engine is ready to take on five weeks of American Southwest
           highways, mountain passes, and desert heat.
         </p>
 

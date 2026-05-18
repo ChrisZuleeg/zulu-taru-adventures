@@ -6,7 +6,6 @@ type Message = { role: "user" | "assistant"; content: string };
 type Mode = "button" | "gate" | "funny" | "password" | "portal";
 
 export default function AdminPortal({
-  id,
   transcript,
   location,
 }: {
@@ -135,7 +134,8 @@ export default function AdminPortal({
           <p className="font-heading text-2xl font-bold text-taru-green mb-2">
             You Shouldn&apos;t Have Clicked That!
           </p>
-          <p className="text-gray-400 text-sm mb-8">Nothing to see here. Move along, traveler.</p>
+          <p className="text-gray-500 text-sm mb-1 italic">&ldquo;These aren&apos;t the droids you&apos;re looking for.&rdquo;</p>
+          <p className="text-gray-400 text-xs mb-8">— Obi-Wan Kenobi &nbsp;·&nbsp; Move along. Move along.</p>
           <button
             onClick={close}
             className="bg-taru-green text-taru-cream font-semibold px-7 py-2.5 rounded-full hover:bg-taru-green-dark transition-colors"

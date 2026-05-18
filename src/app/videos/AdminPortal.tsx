@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMicrophone, faStop } from "@fortawesome/free-solid-svg-icons";
 
 type Message = { role: "user" | "assistant"; content: string };
 type Mode = "button" | "gate" | "funny" | "password" | "portal";
@@ -21,7 +23,56 @@ export default function AdminPortal({
   const [input, setInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState<boolean | null>(null);
+
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const baseInputRef = useRef("");
+
+  function checkVoiceSupport() {
+    if (voiceSupported === null) {
+      const supported = !!(
+        typeof window !== "undefined" &&
+        ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)
+      );
+      setVoiceSupported(supported);
+      return supported;
+    }
+    return voiceSupported;
+  }
+
+  function startListening() {
+    if (!checkVoiceSupport()) return;
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const rec = new SR();
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.lang = "en-US";
+
+    baseInputRef.current = input;
+
+    rec.onresult = (e: any) => {
+      let text = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        text += e.results[i][0].transcript;
+      }
+      const base = baseInputRef.current;
+      setInput((base + (base ? " " : "") + text).trimStart());
+    };
+
+    rec.onerror = () => setListening(false);
+    rec.onend = () => setListening(false);
+
+    recognitionRef.current = rec;
+    rec.start();
+    setListening(true);
+  }
+
+  function stopListening() {
+    recognitionRef.current?.stop();
+    setListening(false);
+  }
 
   async function unlock() {
     setUnlocking(true);
@@ -33,16 +84,8 @@ export default function AdminPortal({
         body: JSON.stringify({ password, transcript, messages: [] }),
       });
       const data = await res.json();
-      if (res.status === 401) {
-        setPasswordError("Wrong password.");
-        setUnlocking(false);
-        return;
-      }
-      if (!res.ok) {
-        setPasswordError(data.error || "Something went wrong.");
-        setUnlocking(false);
-        return;
-      }
+      if (res.status === 401) { setPasswordError("Wrong password."); return; }
+      if (!res.ok) { setPasswordError(data.error || "Something went wrong."); return; }
       const seedUserMsg: Message = transcript?.trim()
         ? { role: "user", content: `Here's a transcript from one of my GoPro videos taken on this road trip. What's the most interesting story hidden in this audio? What moment or detail jumps out at you that we could develop into something beautiful?\n\nTranscript:\n${transcript}` }
         : { role: "user", content: "No transcript yet for this video. Just say hi and let me know to transcribe it first." };
@@ -55,6 +98,7 @@ export default function AdminPortal({
 
   async function sendMessage() {
     if (!input.trim() || chatLoading) return;
+    if (listening) stopListening();
     const userMsg: Message = { role: "user", content: input };
     const next = [...messages, userMsg];
     setMessages(next);
@@ -81,11 +125,11 @@ export default function AdminPortal({
   }
 
   function close() {
+    if (listening) stopListening();
     setMode("button");
     setPasswordError("");
   }
 
-  // Visible messages in chat (hide the hidden seed user message)
   const visibleMessages = messages.filter(
     (m) => !(m.role === "user" && m.content.startsWith("Here's a transcript from one of my GoPro"))
       && !(m.role === "user" && m.content.startsWith("No transcript yet"))
@@ -111,18 +155,8 @@ export default function AdminPortal({
           <p className="font-heading text-2xl font-bold text-taru-green mb-2">Restricted Access</p>
           <p className="text-gray-400 text-sm mb-8">Do you have the access code?</p>
           <div className="flex gap-3 justify-center">
-            <button
-              onClick={() => setMode("password")}
-              className="bg-taru-green text-taru-cream font-semibold px-7 py-2.5 rounded-full hover:bg-taru-green-dark transition-colors"
-            >
-              Yes
-            </button>
-            <button
-              onClick={() => setMode("funny")}
-              className="border-2 border-taru-cream text-gray-500 font-semibold px-7 py-2.5 rounded-full hover:border-gray-300 transition-colors"
-            >
-              No
-            </button>
+            <button onClick={() => setMode("password")} className="bg-taru-green text-taru-cream font-semibold px-7 py-2.5 rounded-full hover:bg-taru-green-dark transition-colors">Yes</button>
+            <button onClick={() => setMode("funny")} className="border-2 border-taru-cream text-gray-500 font-semibold px-7 py-2.5 rounded-full hover:border-gray-300 transition-colors">No</button>
           </div>
         </div>
       )}
@@ -131,17 +165,10 @@ export default function AdminPortal({
       {mode === "funny" && (
         <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-xl">
           <p className="text-5xl mb-4">😅</p>
-          <p className="font-heading text-2xl font-bold text-taru-green mb-2">
-            You Shouldn&apos;t Have Clicked That!
-          </p>
+          <p className="font-heading text-2xl font-bold text-taru-green mb-2">You Shouldn&apos;t Have Clicked That!</p>
           <p className="text-gray-500 text-sm mb-1 italic">&ldquo;These aren&apos;t the droids you&apos;re looking for.&rdquo;</p>
           <p className="text-gray-400 text-xs mb-8">— Obi-Wan Kenobi &nbsp;·&nbsp; Move along. Move along.</p>
-          <button
-            onClick={close}
-            className="bg-taru-green text-taru-cream font-semibold px-7 py-2.5 rounded-full hover:bg-taru-green-dark transition-colors"
-          >
-            Go Back
-          </button>
+          <button onClick={close} className="bg-taru-green text-taru-cream font-semibold px-7 py-2.5 rounded-full hover:bg-taru-green-dark transition-colors">Go Back</button>
         </div>
       )}
 
@@ -161,17 +188,8 @@ export default function AdminPortal({
           />
           {passwordError && <p className="text-red-500 text-xs mb-3 text-center">{passwordError}</p>}
           <div className="flex gap-3">
-            <button
-              onClick={() => { setMode("gate"); setPasswordError(""); }}
-              className="flex-1 border border-taru-cream text-gray-500 text-sm font-semibold py-2.5 rounded-full hover:border-gray-300 transition-colors"
-            >
-              Back
-            </button>
-            <button
-              onClick={unlock}
-              disabled={unlocking}
-              className="flex-1 bg-taru-green text-taru-cream text-sm font-semibold py-2.5 rounded-full hover:bg-taru-green-dark transition-colors disabled:opacity-50"
-            >
+            <button onClick={() => { setMode("gate"); setPasswordError(""); }} className="flex-1 border border-taru-cream text-gray-500 text-sm font-semibold py-2.5 rounded-full hover:border-gray-300 transition-colors">Back</button>
+            <button onClick={unlock} disabled={unlocking} className="flex-1 bg-taru-green text-taru-cream text-sm font-semibold py-2.5 rounded-full hover:bg-taru-green-dark transition-colors disabled:opacity-50">
               {unlocking ? "Opening…" : "Unlock"}
             </button>
           </div>
@@ -183,12 +201,8 @@ export default function AdminPortal({
         <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-taru-cream shrink-0">
-            <p className="font-heading text-lg font-bold text-taru-green">
-              {location || "Untitled"} — Narrative Workshop
-            </p>
-            <button onClick={close} className="text-gray-300 hover:text-gray-500 text-sm transition-colors">
-              ✕ Close
-            </button>
+            <p className="font-heading text-lg font-bold text-taru-green">{location || "Untitled"} — Narrative Workshop</p>
+            <button onClick={close} className="text-gray-300 hover:text-gray-500 text-sm transition-colors">✕ Close</button>
           </div>
 
           {/* Scrollable body */}
@@ -198,20 +212,13 @@ export default function AdminPortal({
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[11px] font-semibold text-taru-green uppercase tracking-wider">Full Transcript</p>
                 {transcript && (
-                  <button
-                    onClick={copyTranscript}
-                    className="text-xs text-taru-green/60 hover:text-taru-green transition-colors"
-                  >
+                  <button onClick={copyTranscript} className="text-xs text-taru-green/60 hover:text-taru-green transition-colors">
                     {copied ? "✓ Copied!" : "Copy"}
                   </button>
                 )}
               </div>
               {transcript ? (
-                <textarea
-                  readOnly
-                  value={transcript}
-                  className="w-full h-36 text-xs text-gray-600 border border-taru-cream rounded-xl p-3 bg-taru-sand resize-none focus:outline-none leading-relaxed"
-                />
+                <textarea readOnly value={transcript} className="w-full h-36 text-xs text-gray-600 border border-taru-cream rounded-xl p-3 bg-taru-sand resize-none focus:outline-none leading-relaxed" />
               ) : (
                 <p className="text-sm text-gray-400 italic">No transcript yet — transcribe this video first.</p>
               )}
@@ -241,25 +248,44 @@ export default function AdminPortal({
 
           {/* Input */}
           <div className="px-6 py-4 border-t border-taru-cream shrink-0">
-            <div className="flex gap-2">
+            {listening && (
+              <p className="text-xs text-red-400 animate-pulse mb-2 flex items-center gap-1.5">
+                <span className="inline-block w-2 h-2 rounded-full bg-red-400" />
+                Listening… tap the mic again to stop
+              </p>
+            )}
+            <div className="flex gap-2 items-end">
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                placeholder="Ask for a narrative angle, a different tone, a specific moment to develop…"
+                placeholder="Speak or type — ask for a narrative angle, a tone, a moment to develop…"
                 rows={2}
                 className="flex-1 border border-taru-cream rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-taru-green bg-taru-sand resize-none"
               />
+              {/* Mic button */}
+              <button
+                onClick={listening ? stopListening : startListening}
+                title={listening ? "Stop recording" : "Speak your message"}
+                className={`p-3 rounded-xl transition-all shrink-0 ${
+                  listening
+                    ? "bg-red-500 text-white animate-pulse"
+                    : "bg-taru-cream text-taru-green hover:bg-taru-green hover:text-taru-cream"
+                }`}
+              >
+                <FontAwesomeIcon icon={listening ? faStop : faMicrophone} className="h-4 w-4" />
+              </button>
+              {/* Send button */}
               <button
                 onClick={sendMessage}
                 disabled={chatLoading || !input.trim()}
-                className="bg-taru-green text-taru-cream text-lg font-semibold px-4 rounded-xl hover:bg-taru-green-dark transition-colors disabled:opacity-40 self-end pb-2"
+                className="bg-taru-green text-taru-cream text-lg font-semibold px-4 py-3 rounded-xl hover:bg-taru-green-dark transition-colors disabled:opacity-40 shrink-0"
               >
                 →
               </button>
             </div>
-            <p className="text-[10px] text-gray-300 mt-1">Enter to send · Shift+Enter for new line</p>
+            <p className="text-[10px] text-gray-300 mt-1.5">Tap 🎤 to speak · Enter to send · Shift+Enter for new line</p>
           </div>
         </div>
       )}

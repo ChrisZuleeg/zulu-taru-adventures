@@ -3,6 +3,7 @@ import { driveEmbedUrl, driveThumbnailUrl } from "@/lib/drive";
 import TranscribeButton from "./TranscribeButton";
 import SummaryBlock from "./SummaryBlock";
 import VideoLazyEmbed from "./VideoLazyEmbed";
+import AdminPortal from "./AdminPortal";
 
 export const revalidate = 60;
 
@@ -24,7 +25,7 @@ export default async function Videos() {
   if (supabase) {
     const { data } = await supabase
       .from("media")
-      .select("id,location,filmed_at,r2_url,summary,created_at")
+      .select("id,location,filmed_at,r2_url,summary,transcript,created_at")
       .eq("type", "video")
       .order("filmed_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false });
@@ -82,6 +83,11 @@ export default async function Videos() {
                       ) : (
                         <TranscribeButton id={String(video.id)} />
                       )}
+                      <AdminPortal
+                        id={String(video.id)}
+                        transcript={video.transcript ?? null}
+                        location={video.location ?? null}
+                      />
                     </div>
                   </div>
                 ))}

@@ -87,6 +87,7 @@ function buildPhotoSections(photos: MediaItem[]) {
   const orderedKeys = [...keys];
   if (groups.has("__undated__")) orderedKeys.push("__undated__");
 
+  let runningCount = 0;
   return orderedKeys.map((key) => {
     const items = groups.get(key)!;
     const tiles: PhotoTile[] = items.map((photo) => ({
@@ -98,11 +99,14 @@ function buildPhotoSections(photos: MediaItem[]) {
       candidates: buildImageCandidates(photo),
       likes_count: photo.likes_count ?? 0,
     }));
+    const initialOpen = runningCount < 50;
+    runningCount += items.length;
     const sectionId = key === "__undated__" ? "undated" : key;
     return {
       sectionId,
       dateLabel: dateLabelForDayKey(key),
       photos: tiles,
+      initialOpen,
     };
   });
 }
@@ -146,12 +150,13 @@ export default async function Photos() {
         </div>
       ) : (
         <div className="space-y-12">
-          {buildPhotoSections(photos).map(({ sectionId, dateLabel, photos: tiles }) => (
+          {buildPhotoSections(photos).map(({ sectionId, dateLabel, photos: tiles, initialOpen }) => (
             <PhotoDateGroup
               key={sectionId}
               sectionId={sectionId}
               dateLabel={dateLabel}
               photos={tiles}
+              initialOpen={initialOpen}
             />
           ))}
         </div>

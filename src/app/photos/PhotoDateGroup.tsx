@@ -20,10 +20,11 @@ type PhotoDateGroupProps = {
   sectionId: string;
   dateLabel: string;
   photos: PhotoTile[];
+  initialOpen?: boolean;
 };
 
-export default function PhotoDateGroup({ sectionId, dateLabel, photos }: PhotoDateGroupProps) {
-  const [open, setOpen] = useState(true);
+export default function PhotoDateGroup({ sectionId, dateLabel, photos, initialOpen = true }: PhotoDateGroupProps) {
+  const [open, setOpen] = useState(initialOpen);
   const [selected, setSelected] = useState<PhotoTile | null>(null);
   const gridId = `photo-grid-${sectionId}`;
   const headingId = `photos-date-${sectionId}`;

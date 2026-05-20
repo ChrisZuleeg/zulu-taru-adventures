@@ -12,6 +12,7 @@ type StatsData = {
   top_countries: { country: string; count: number }[];
   us_states: { state: string; count: number }[];
   daily: { date: string; pageviews: number; visitors: number }[];
+  comments_this_month: number;
 };
 
 const STATE_NAMES: Record<string, string> = {
@@ -111,6 +112,15 @@ export default function Stats() {
     <div className="max-w-4xl mx-auto px-6 py-16">
       <h1 className="font-heading text-5xl font-bold text-taru-green mb-2">Site Stats</h1>
       <p className="text-taru-brown italic text-lg mb-10">Who&apos;s been following along</p>
+
+      {/* Formspree warning */}
+      {data.comments_this_month >= 35 && (
+        <div className={`mb-6 rounded-xl px-5 py-4 text-sm font-semibold ${data.comments_this_month >= 45 ? "bg-red-50 border border-red-300 text-red-700" : "bg-amber-50 border border-amber-300 text-amber-800"}`}>
+          {data.comments_this_month >= 45
+            ? `⚠️ Formspree limit almost reached: ${data.comments_this_month}/50 comment emails sent this month. New comments will stop sending you notifications until next month!`
+            : `⚡ Heads up: ${data.comments_this_month}/50 comment emails sent this month via Formspree free tier.`}
+        </div>
+      )}
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-4 mb-10">

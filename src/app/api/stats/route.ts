@@ -17,10 +17,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data: rows } = await supabase
-    .from("pageviews")
-    .select("page, visitor_id, country, country_region, created_at")
-    .order("created_at", { ascending: false });
+  const [{ data: rows }, { count: comments_this_month }] = await Promise.all([
+    supabase
+      .from("pageviews")
+      .select("page, visitor_id, country, country_region, created_at")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("comments")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+  ]);
 
   if (!rows) return NextResponse.json({ error: "No data" }, { status: 500 });
 
@@ -65,5 +71,5 @@ export async function GET(request: NextRequest) {
     .map(([date, { pageviews, visitors }]) => ({ date, pageviews, visitors: visitors.size }))
     .sort((a, b) => a.date.localeCompare(b.date));
 
-  return NextResponse.json({ total_pageviews, unique_visitors, top_pages, top_countries, us_states, daily });
+  return NextResponse.json({ total_pageviews, unique_visitors, top_pages, top_countries, us_states, daily, comments_this_month: comments_this_month ?? 0 });
 }

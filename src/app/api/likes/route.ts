@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   const { media_id } = await request.json();
   if (!media_id) return NextResponse.json({ error: "media_id required." }, { status: 400 });
 
-  const { data, error } = await supabase.rpc("increment_likes", { target_id: media_id });
+  const { data, error } = await supabase.rpc("increment_likes", { target_id: String(media_id) });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   return NextResponse.json({ likes_count: data });

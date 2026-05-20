@@ -21,5 +21,6 @@ export type MediaItem = {
   duration_seconds: number | null;
   transcript: string | null;
   summary: string | null;
+  likes_count: number;
   created_at: string;
 };

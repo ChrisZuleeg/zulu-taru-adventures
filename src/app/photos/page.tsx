@@ -93,8 +93,10 @@ function buildPhotoSections(photos: MediaItem[]) {
       id: photo.id,
       title: photo.title,
       location: photo.location,
+      filmed_at: photo.filmed_at,
       r2_url: photo.r2_url,
       candidates: buildImageCandidates(photo),
+      likes_count: photo.likes_count ?? 0,
     }));
     const sectionId = key === "__undated__" ? "undated" : key;
     return {

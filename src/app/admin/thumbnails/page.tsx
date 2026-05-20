@@ -14,6 +14,7 @@ export default function ThumbnailAdmin() {
   const [log, setLog] = useState<string[]>([]);
   const [width, setWidth] = useState(400);
   const stopRef = useRef(false);
+  const failedIdsRef = useRef<string[]>([]);
 
   async function checkAuth() {
     setAuthError("");
@@ -31,6 +32,7 @@ export default function ThumbnailAdmin() {
 
   async function start() {
     stopRef.current = false;
+    failedIdsRef.current = [];
     setStatus("running");
     setLog([]);
 
@@ -43,13 +45,13 @@ export default function ThumbnailAdmin() {
         const res = await fetch("/api/admin/thumbnails", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password, width }),
+          body: JSON.stringify({ password, width, exclude_ids: failedIdsRef.current }),
         });
         const data = await res.json();
 
         if (!res.ok) {
-          addLog(`⚠️ Error on ${data.photo_id || "unknown"}: ${data.error}`);
-          // Don't stop on individual errors — keep going
+          if (data.photo_id) failedIdsRef.current = [...failedIdsRef.current, data.photo_id];
+          addLog(`⏭ Skipped ${data.photo_id || "unknown"}: ${data.error}`);
           continue;
         }
 
@@ -63,6 +65,7 @@ export default function ThumbnailAdmin() {
         }
 
         if (data.skipped) {
+          failedIdsRef.current = [...failedIdsRef.current, data.skipped];
           addLog(`⏭ Skipped (couldn't fetch): ${data.skipped}`);
         } else if (data.processed) {
           addLog(`✓ ${data.processed} — ${data.size_kb}KB`);

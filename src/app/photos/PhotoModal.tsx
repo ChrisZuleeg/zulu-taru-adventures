@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart, faXmark, faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
-import { faHeart as faHeartOutline } from "@fortawesome/free-regular-svg-icons";
 import PhotoTileImage from "./PhotoTileImage";
 
 type Comment = {
@@ -78,7 +77,7 @@ export default function PhotoModal({
     });
   }
 
-  async function handleComment(e: React.FormEvent) {
+  async function handleComment(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!text.trim()) return;
     setSubmitError("");
@@ -126,11 +125,17 @@ export default function PhotoModal({
             <p className="font-semibold text-taru-green text-sm">{location || title}</p>
             {dateStr && <p className="text-xs text-gray-400">{dateStr}</p>}
           </div>
-          <div className="flex items-center gap-3">
-            <a href={r2_url} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-taru-green transition-colors" title="View full size">
-              <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="h-4 w-4" />
+          <div className="flex items-center gap-2">
+            <a
+              href={r2_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-taru-green border border-taru-green/30 px-3 py-1.5 rounded-full hover:bg-taru-green hover:text-white transition-colors"
+            >
+              <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="h-3 w-3" />
+              Full Size
             </a>
-            <button onClick={onClose} className="text-gray-300 hover:text-gray-600 transition-colors">
+            <button onClick={onClose} className="text-gray-300 hover:text-gray-600 transition-colors ml-1">
               <FontAwesomeIcon icon={faXmark} className="h-5 w-5" />
             </button>
           </div>
@@ -150,7 +155,7 @@ export default function PhotoModal({
               disabled={liked}
               className={`flex items-center gap-1.5 text-sm font-semibold transition-colors ${liked ? "text-red-500" : "text-gray-400 hover:text-red-400"}`}
             >
-              <FontAwesomeIcon icon={liked ? faHeart : faHeartOutline} className="h-5 w-5" />
+              <FontAwesomeIcon icon={faHeart} className="h-5 w-5" />
               <span>{likes > 0 ? likes : ""}</span>
             </button>
             {liked && <span className="text-xs text-gray-400">Thanks for the love!</span>}
